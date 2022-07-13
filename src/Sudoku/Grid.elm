@@ -1,4 +1,4 @@
-module Sudoku.Grid exposing
+port module Sudoku.Grid exposing
     ( Coord
     , Grid
     , coordDecoder
@@ -7,6 +7,8 @@ module Sudoku.Grid exposing
     , encodeCoord
     , fromString
     , getByCoord
+    , onChange
+    , save
     , setByCoord
     , toBoxes
     , toCols
@@ -229,6 +231,11 @@ removeFixed fixedVals possible =
     List.foldl List.Extra.remove possible fixedVals
 
 
+empty : Grid
+empty =
+    Array.fromList (List.repeat 81 Cell.default) |> Grid
+
+
 
 -- Encode/Decode
 
@@ -299,3 +306,29 @@ coordDecoder =
     Decode.map2 Coord
         (Decode.field "x" Decode.int)
         (Decode.field "y" Decode.int)
+
+
+
+-- Ports
+
+
+port storeSudokuGrid : Encode.Value -> Cmd msg
+
+
+port loadSudokuGrid : (Encode.Value -> msg) -> Sub msg
+
+
+save : Grid -> Cmd msg
+save grid =
+    grid |> encode |> storeSudokuGrid
+
+
+onChange : (Grid -> msg) -> Sub msg
+onChange fromGrid =
+    loadSudokuGrid
+        (\json ->
+            json
+                |> Decode.decodeValue decoder
+                |> Result.withDefault empty
+                |> fromGrid
+        )
