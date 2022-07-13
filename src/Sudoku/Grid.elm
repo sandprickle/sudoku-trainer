@@ -1,6 +1,10 @@
 module Sudoku.Grid exposing
     ( Coord
     , Grid
+    , coordDecoder
+    , decoder
+    , encode
+    , encodeCoord
     , fromString
     , getByCoord
     , setByCoord
@@ -10,6 +14,8 @@ module Sudoku.Grid exposing
     )
 
 import Array exposing (Array)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import List.Extra
 import Sudoku.Cell as Cell exposing (Cell)
 import Sudoku.Number as Number exposing (Number)
@@ -17,10 +23,6 @@ import Sudoku.Number as Number exposing (Number)
 
 type Grid
     = Grid (Array Cell)
-
-
-type alias Coord =
-    { x : Int, y : Int }
 
 
 
@@ -228,7 +230,25 @@ removeFixed fixedVals possible =
 
 
 
--- Misc Helpers
+-- Encode/Decode
+
+
+encode : Grid -> Encode.Value
+encode (Grid grid) =
+    Encode.array Cell.encode grid
+
+
+decoder : Decoder Grid
+decoder =
+    Decode.map Grid (Decode.array Cell.decoder)
+
+
+
+-- Coord Type
+
+
+type alias Coord =
+    { x : Int, y : Int }
 
 
 coordToIndex : Coord -> Int
@@ -264,3 +284,18 @@ normalizeCoord coord =
                 coord.x
     in
     { x = x, y = y }
+
+
+encodeCoord : Coord -> Encode.Value
+encodeCoord coord =
+    Encode.object
+        [ ( "x", Encode.int coord.x )
+        , ( "y", Encode.int coord.y )
+        ]
+
+
+coordDecoder : Decoder Coord
+coordDecoder =
+    Decode.map2 Coord
+        (Decode.field "x" Decode.int)
+        (Decode.field "y" Decode.int)
