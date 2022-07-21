@@ -5,6 +5,7 @@ port module Sudoku.Grid exposing
     , decoder
     , encode
     , encodeCoord
+    , fromJson
     , fromString
     , getByCoord
     , onChange
@@ -323,12 +324,18 @@ save grid =
     grid |> encode |> storeSudokuGrid
 
 
+fromJson : Encode.Value -> Grid
+fromJson json =
+    json
+        |> Decode.decodeValue decoder
+        |> Result.withDefault empty
+
+
 onChange : (Grid -> msg) -> Sub msg
 onChange fromGrid =
     loadSudokuGrid
         (\json ->
             json
-                |> Decode.decodeValue decoder
-                |> Result.withDefault empty
+                |> fromJson
                 |> fromGrid
         )
