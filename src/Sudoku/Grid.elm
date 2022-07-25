@@ -1,4 +1,4 @@
-port module Sudoku.Grid exposing
+module Sudoku.Grid exposing
     ( Coord
     , Grid
     , coordDecoder
@@ -8,8 +8,6 @@ port module Sudoku.Grid exposing
     , fromJson
     , fromString
     , getByCoord
-    , onChange
-    , save
     , setByCoord
     , toBoxes
     , toCols
@@ -251,6 +249,16 @@ decoder =
     Decode.map Grid (Decode.array Cell.decoder)
 
 
+fromJson : Encode.Value -> Maybe Grid
+fromJson json =
+    case Decode.decodeValue decoder json of
+        Ok grid ->
+            Just Grid
+
+        Err _ ->
+            Nothing
+
+
 
 -- Coord Type
 
@@ -309,33 +317,8 @@ coordDecoder =
         (Decode.field "y" Decode.int)
 
 
-
--- Ports
-
-
-port storeSudokuGrid : Encode.Value -> Cmd msg
-
-
-port loadSudokuGrid : (Encode.Value -> msg) -> Sub msg
-
-
-save : Grid -> Cmd msg
-save grid =
-    grid |> encode |> storeSudokuGrid
-
-
 fromJson : Encode.Value -> Grid
 fromJson json =
     json
         |> Decode.decodeValue decoder
         |> Result.withDefault empty
-
-
-onChange : (Grid -> msg) -> Sub msg
-onChange fromGrid =
-    loadSudokuGrid
-        (\json ->
-            json
-                |> fromJson
-                |> fromGrid
-        )
