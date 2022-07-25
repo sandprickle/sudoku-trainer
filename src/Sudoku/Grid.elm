@@ -253,7 +253,7 @@ fromJson : Encode.Value -> Maybe Grid
 fromJson json =
     case Decode.decodeValue decoder json of
         Ok grid ->
-            Just Grid
+            Just grid
 
         Err _ ->
             Nothing
@@ -315,10 +315,3 @@ coordDecoder =
     Decode.map2 Coord
         (Decode.field "x" Decode.int)
         (Decode.field "y" Decode.int)
-
-
-fromJson : Encode.Value -> Grid
-fromJson json =
-    json
-        |> Decode.decodeValue decoder
-        |> Result.withDefault empty

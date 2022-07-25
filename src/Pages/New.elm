@@ -1,11 +1,8 @@
 module Pages.New exposing (Model, Msg, page)
 
-import Gen.Params.New exposing (Params)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Attr exposing (css)
 import Html.Styled.Events exposing (onInput)
-import Page
-import Request
 import Shared
 import Sudoku.Cell as Cell
 import Sudoku.Grid as Grid exposing (Grid)

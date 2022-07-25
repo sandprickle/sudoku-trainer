@@ -1,41 +1,44 @@
 module UI exposing (..)
 
-import Css exposing (Style)
-import Html.Styled as Html exposing (..)
-import Html.Styled.Attributes exposing (css)
-import Tailwind.Utilities as Tw
+import Html exposing (..)
+import Html.Attributes exposing (class, href, target)
+import Svg exposing (svg)
+import Svg.Attributes as SvgAttr
 
 
-btnStyles : Style
-btnStyles =
-    Css.batch
-        [ Tw.rounded_full
-        , Tw.bg_pink_800
-        , Tw.px_4
-        , Tw.py_2
-        , Tw.no_underline
-        , Css.hover [ Tw.bg_pink_700 ]
-        , Css.focus [ Tw.bg_pink_700 ]
-        ]
-
-
-centeredBox : List (Html msg) -> List (Html msg)
-centeredBox children =
-    [ div
-        [ css
-            [ Tw.flex
-            , Tw.items_center
-            , Tw.justify_center
-            , Tw.h_full
+layout : List (Html msg) -> List (Html msg)
+layout children =
+    [ header [ class "flex items-center justify-between px-8 py-4" ]
+        [ h1
+            [ class "text-3xl text-primary font-bold" ]
+            [ text "Sudoku Trainer" ]
+        , a
+            [ href "https://github.com/sandprickle/sudoku-trainer"
+            , target "_blank"
+            , class "text-primary"
             ]
+            [ githubIcon ]
         ]
-        [ div
-            [ css
-                [ Tw.p_8
-                , Tw.rounded
-                , Tw.bg_gray_700
-                ]
-            ]
-            children
-        ]
+    , main_ [] children
     ]
+
+
+githubIcon : Html msg
+githubIcon =
+    svg
+        [ SvgAttr.width "24"
+        , SvgAttr.height "24"
+        , SvgAttr.viewBox "0 0 24 24"
+        , SvgAttr.fill "none"
+        , SvgAttr.stroke "currentColor"
+        , SvgAttr.strokeWidth "2"
+        , SvgAttr.strokeLinecap "round"
+        , SvgAttr.strokeLinejoin "round"
+        , SvgAttr.class "feather feather-github"
+        ]
+        [ Svg.path
+            [ SvgAttr.d
+                "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+            ]
+            []
+        ]

@@ -16,7 +16,6 @@ module Sudoku.Number exposing
     , two
     )
 
-import Css exposing (num)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
