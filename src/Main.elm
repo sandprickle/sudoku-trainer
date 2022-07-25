@@ -24,7 +24,9 @@ main =
 
 
 type alias Model =
-    { puzzle : Maybe Grid, view : View }
+    { puzzle : Maybe Grid
+    , view : View
+    }
 
 
 type Msg
