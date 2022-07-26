@@ -1,13 +1,18 @@
-module Sudoku.Grid exposing
+port module Sudoku.Grid exposing
     ( Coord
     , Grid
     , coordDecoder
     , decoder
+    , empty
     , encode
     , encodeCoord
     , fromJson
     , fromString
     , getByCoord
+    , load
+    , preview
+    , receiver
+    , save
     , setByCoord
     , toBoxes
     , toCols
@@ -15,6 +20,8 @@ module Sudoku.Grid exposing
     )
 
 import Array exposing (Array)
+import Html exposing (Html)
+import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra
@@ -260,6 +267,34 @@ fromJson json =
 
 
 
+-- PERSISTANCE
+
+
+port saveGrid : Decode.Value -> Cmd msg
+
+
+port loadGrid : () -> Cmd msg
+
+
+port gridReceiver : (Decode.Value -> msg) -> Sub msg
+
+
+save : Grid -> Cmd msg
+save grid =
+    saveGrid (encode grid)
+
+
+load : () -> Cmd msg
+load _ =
+    loadGrid ()
+
+
+receiver : (Maybe Grid -> msg) -> Sub msg
+receiver fromGrid =
+    gridReceiver (\json -> fromJson json |> fromGrid)
+
+
+
 -- Coord Type
 
 
@@ -315,3 +350,25 @@ coordDecoder =
     Decode.map2 Coord
         (Decode.field "x" Decode.int)
         (Decode.field "y" Decode.int)
+
+
+
+-- View Helpers
+
+
+preview : Grid -> Html msg
+preview grid =
+    let
+        rows =
+            toRows grid
+
+        viewCell cell =
+            Html.td []
+                [ Html.div [] [ Html.text (Cell.numberToString cell) ] ]
+
+        viewRow row =
+            Html.tr [] (List.map viewCell row)
+    in
+    Html.table
+        [ Html.Attributes.class "puzzle-preview border-2 border-gray-400" ]
+        (List.map viewRow rows)
