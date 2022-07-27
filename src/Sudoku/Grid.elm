@@ -24,7 +24,7 @@ import Html exposing (Html)
 import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import List.Extra
+import List.Extra exposing (allDifferent)
 import Sudoku.Cell as Cell exposing (Cell)
 import Sudoku.Number as Number exposing (Number)
 
@@ -47,6 +47,60 @@ fromString str =
         |> Array.fromList
         |> Grid
         |> pruneAll
+
+
+
+-- Validity Checks
+
+
+solvable : Grid -> Maybe Grid
+solvable (Grid grid) =
+    let
+        givenNumbers =
+            Array.filter Cell.isGiven grid
+    in
+    if Array.length givenNumbers >= 17 then
+        Just (Grid grid)
+
+    else
+        Nothing
+
+
+legal : Grid -> Maybe Grid
+legal grid =
+    let
+        rowsOk =
+            grid
+                |> toRows
+                |> List.map checkGroup
+                |> List.member False
+                |> not
+
+        colsOk =
+            grid
+                |> toCols
+                |> List.map checkGroup
+                |> List.member False
+                |> not
+
+        boxesOk =
+            grid
+                |> toBoxes
+                |> List.map checkGroup
+                |> List.member False
+                |> not
+
+        checkGroup : List Cell -> Bool
+        checkGroup group =
+            group
+                |> List.filter Cell.isFilled
+                |> allDifferent
+    in
+    if rowsOk && colsOk && boxesOk then
+        Just grid
+
+    else
+        Nothing
 
 
 
