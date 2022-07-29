@@ -9,11 +9,16 @@ port module Sudoku.Grid exposing
     , fromJson
     , fromString
     , getByCoord
+    , isLegal
+    , isSolvable
+    , legal
     , load
     , preview
+    , pruneAll
     , receiver
     , save
     , setByCoord
+    , solvable
     , toBoxes
     , toCols
     , toRows
@@ -46,7 +51,6 @@ fromString str =
         |> List.map Cell.initFromChar
         |> Array.fromList
         |> Grid
-        |> pruneAll
 
 
 
@@ -64,6 +68,11 @@ solvable (Grid grid) =
 
     else
         Nothing
+
+
+isSolvable : Grid -> Bool
+isSolvable grid =
+    solvable grid /= Nothing
 
 
 legal : Grid -> Maybe Grid
@@ -101,6 +110,11 @@ legal grid =
 
     else
         Nothing
+
+
+isLegal : Grid -> Bool
+isLegal grid =
+    legal grid /= Nothing
 
 
 
