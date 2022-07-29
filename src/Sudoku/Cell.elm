@@ -1,5 +1,5 @@
 module Sudoku.Cell exposing
-    ( Cell
+    ( Cell(..)
     , Notes
     , decoder
     , default
