@@ -1,5 +1,6 @@
 module Sudoku.Number exposing
-    ( Number
+    ( NumSet
+    , Number
     , all
     , decoder
     , eight
@@ -18,28 +19,15 @@ module Sudoku.Number exposing
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Set exposing (Set)
 
 
 type Number
     = Number Int
 
 
-encode : Number -> Encode.Value
-encode (Number num) =
-    Encode.int num
 
-
-decoder : Decoder Number
-decoder =
-    Decode.int
-        |> Decode.andThen
-            (\num ->
-                if num >= 1 && num <= 9 then
-                    Decode.succeed (Number num)
-
-                else
-                    Decode.fail "Number must be between 1 and 9"
-            )
+-- Create a Number
 
 
 toString : Number -> String
@@ -79,6 +67,36 @@ fromChar char =
 
         _ ->
             Nothing
+
+
+
+-- Set Type
+
+
+{-| A set of Numbers
+-}
+type NumSet
+    = NumSet (Set Int)
+
+
+setAll : NumSet
+setAll =
+    List.range 1 9 |> Set.fromList |> NumSet
+
+
+setInsert : Number -> NumSet -> NumSet
+setInsert (Number num) (NumSet set) =
+    NumSet (Set.insert num set)
+
+
+setRemove : Number -> NumSet -> NumSet
+setRemove (Number num) (NumSet set) =
+    NumSet (Set.remove num set)
+
+
+setMember : Number -> NumSet -> Bool
+setMember (Number num) (NumSet set) =
+    Set.member num set
 
 
 
@@ -133,3 +151,25 @@ nine =
 all : List Number
 all =
     [ one, two, three, four, five, six, seven, eight, nine ]
+
+
+
+-- Encode/Decode
+
+
+encode : Number -> Encode.Value
+encode (Number num) =
+    Encode.int num
+
+
+decoder : Decoder Number
+decoder =
+    Decode.int
+        |> Decode.andThen
+            (\num ->
+                if num >= 1 && num <= 9 then
+                    Decode.succeed (Number num)
+
+                else
+                    Decode.fail "Number must be between 1 and 9"
+            )
