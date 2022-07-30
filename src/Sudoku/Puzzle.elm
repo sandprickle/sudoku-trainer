@@ -75,7 +75,9 @@ clearCell coord (Puzzle grid) =
             Puzzle grid
 
         Fixed _ notes ->
-            Puzzle (Grid.setByCoord coord grid Cell.default)
+            Possible Number.setAll notes
+                |> Grid.setByCoord coord grid
+                |> Puzzle
 
         Possible _ notes ->
             Puzzle grid

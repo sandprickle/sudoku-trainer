@@ -126,6 +126,11 @@ getNotes cell =
             Just notes
 
 
+{-| A cell with all possible numbers, and no notes.
+Used as a default value to shut up the complier when
+setting a cell in a grid and as an initial empty cell
+when creating a new grid
+-}
 default : Cell
 default =
     Possible Number.setAll { primary = [], secondary = [] }
