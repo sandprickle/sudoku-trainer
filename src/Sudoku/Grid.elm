@@ -31,7 +31,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra exposing (allDifferent)
 import Sudoku.Cell as Cell exposing (Cell)
-import Sudoku.Number as Number exposing (Number)
+import Sudoku.Number as Number exposing (NumSet, Number)
 
 
 type Grid
@@ -280,9 +280,9 @@ pruneCells : List Cell -> List Cell
 pruneCells cells =
     let
         fixedNumbers =
-            List.filterMap Cell.getNumber cells
+            List.filterMap Cell.getNumber cells |> Number.setFromList
 
-        updatePossible : Cell -> List Number -> Cell
+        updatePossible : Cell -> NumSet -> Cell
         updatePossible cell_ numbers =
             Cell.setPossible numbers cell_
 
@@ -290,19 +290,13 @@ pruneCells cells =
         pruneCell cell =
             case Cell.getPossible cell of
                 Just possible ->
-                    possible
-                        |> removeFixed fixedNumbers
+                    Number.setDiff possible fixedNumbers
                         |> updatePossible cell
 
                 Nothing ->
                     cell
     in
     List.map pruneCell cells
-
-
-removeFixed : List a -> List a -> List a
-removeFixed fixedVals possible =
-    List.foldl List.Extra.remove possible fixedVals
 
 
 empty : Grid

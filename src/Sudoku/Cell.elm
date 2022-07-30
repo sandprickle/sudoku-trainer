@@ -16,13 +16,13 @@ module Sudoku.Cell exposing
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Sudoku.Number as Number exposing (Number)
+import Sudoku.Number as Number exposing (NumSet, Number)
 
 
 type Cell
     = Given Number
     | Fixed Number Notes
-    | Possible (List Number) Notes
+    | Possible NumSet Notes
 
 
 initFromChar : Char -> Cell
@@ -32,7 +32,7 @@ initFromChar char =
             Given number
 
         Nothing ->
-            Possible Number.all { primary = [], secondary = [] }
+            Possible Number.setAll { primary = [], secondary = [] }
 
 
 numberToString : Cell -> String
@@ -87,7 +87,7 @@ getNumber cell =
             Nothing
 
 
-getPossible : Cell -> Maybe (List Number)
+getPossible : Cell -> Maybe NumSet
 getPossible cell =
     case cell of
         Given _ ->
@@ -100,7 +100,7 @@ getPossible cell =
             Just possible
 
 
-setPossible : List Number -> Cell -> Cell
+setPossible : NumSet -> Cell -> Cell
 setPossible possible cell =
     case cell of
         Given _ ->
@@ -128,7 +128,7 @@ getNotes cell =
 
 default : Cell
 default =
-    Possible [] { primary = [], secondary = [] }
+    Possible Number.setAll { primary = [], secondary = [] }
 
 
 
@@ -154,7 +154,7 @@ encode cell =
         Possible nums notes ->
             Encode.object
                 [ ( "type", Encode.string "possible" )
-                , ( "possibleNums", Encode.list Number.encode nums )
+                , ( "possibleNums", Number.encodeSet nums )
                 , ( "notes", encodeNotes notes )
                 ]
 
@@ -194,7 +194,7 @@ decodeFixed =
 decodePossible : Decoder Cell
 decodePossible =
     Decode.map2 Possible
-        (Decode.field "possibleNums" (Decode.list Number.decoder))
+        (Decode.field "possibleNums" Number.setDecoder)
         (Decode.field "notes" notesDecoder)
 
 

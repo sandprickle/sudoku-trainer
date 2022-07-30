@@ -5,11 +5,19 @@ module Sudoku.Number exposing
     , decoder
     , eight
     , encode
+    , encodeSet
     , five
     , four
     , fromChar
     , nine
     , one
+    , setAll
+    , setDecoder
+    , setDiff
+    , setFromList
+    , setInsert
+    , setMember
+    , setRemove
     , seven
     , six
     , three
@@ -27,7 +35,7 @@ type Number
 
 
 
--- Create a Number
+-- Primitive Conversions
 
 
 toString : Number -> String
@@ -69,8 +77,13 @@ fromChar char =
             Nothing
 
 
+toInt : Number -> Int
+toInt (Number int) =
+    int
 
--- Set Type
+
+
+-- NumSet Type
 
 
 {-| A set of Numbers
@@ -79,6 +92,8 @@ type NumSet
     = NumSet (Set Int)
 
 
+{-| A set of all Numbers
+-}
 setAll : NumSet
 setAll =
     List.range 1 9 |> Set.fromList |> NumSet
@@ -94,9 +109,39 @@ setRemove (Number num) (NumSet set) =
     NumSet (Set.remove num set)
 
 
+{-| Get the difference between the first set and the second.
+Keeps values that do not appear in the second set.
+-}
+setDiff : NumSet -> NumSet -> NumSet
+setDiff (NumSet set1) (NumSet set2) =
+    NumSet (Set.diff set1 set2)
+
+
+setFromList : List Number -> NumSet
+setFromList list =
+    list
+        |> List.map toInt
+        |> Set.fromList
+        |> NumSet
+
+
 setMember : Number -> NumSet -> Bool
 setMember (Number num) (NumSet set) =
     Set.member num set
+
+
+encodeSet : NumSet -> Encode.Value
+encodeSet (NumSet set) =
+    Encode.set Encode.int set
+
+
+setDecoder : Decoder NumSet
+setDecoder =
+    Decode.list decoder
+        |> Decode.andThen
+            (\list ->
+                Decode.succeed (setFromList list)
+            )
 
 
 
