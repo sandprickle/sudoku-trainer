@@ -1,9 +1,16 @@
 module Pages.New exposing (Model, Msg, page)
 
 import Gen.Params.New exposing (Params)
-import Gen.Route as Route exposing (Route)
+import Gen.Route as Route
 import Html exposing (button, div, h2, p, text, textarea)
-import Html.Attributes exposing (autocomplete, autofocus, class, cols, minlength, rows, spellcheck, value, wrap)
+import Html.Attributes
+    exposing
+        ( autocomplete
+        , autofocus
+        , class
+        , spellcheck
+        , value
+        )
 import Html.Events exposing (onClick, onInput)
 import Page
 import Request
@@ -14,7 +21,7 @@ import View exposing (View)
 
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
+page _ req =
     Page.element
         { init = init
         , update = update req
@@ -66,7 +73,7 @@ update req msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 

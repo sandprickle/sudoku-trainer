@@ -1,27 +1,19 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Gen.Params.Home_ exposing (Params)
-import Gen.Route as Route exposing (Route)
+import Gen.Route as Route
 import Html exposing (..)
-import Html.Attributes
-    exposing
-        ( class
-        , href
-        , target
-        , value
-        )
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, href)
 import Page
 import Request
 import Shared
-import Sudoku.Cell as Cell exposing (Cell)
 import Sudoku.Grid as Grid exposing (Grid)
 import UI
 import View exposing (View)
 
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
+page shared _ =
     Page.element
         { init = init shared.currentPuzzle
         , update = update
@@ -51,7 +43,9 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        ClickedNewPuzzle ->
+            ( model, Cmd.none )
 
 
 view : Model -> View Msg
@@ -96,5 +90,5 @@ viewNewPuzzle =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none

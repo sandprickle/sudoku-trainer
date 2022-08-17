@@ -1,6 +1,7 @@
 module Sudoku.Puzzle exposing
     ( Coord
     , Puzzle
+    , clearCell
     , fixCell
     , fromGrid
     , prune
@@ -38,7 +39,7 @@ type Problem
     | IllegalNumber Coord
 
 
-fixCell : Number -> Coord -> Puzzle Valid -> Result Problem (Puzzle Valid)
+fixCell : Number -> Coord -> Puzzle Pruned -> Result Problem (Puzzle Pruned)
 fixCell newNum coord (Puzzle grid) =
     let
         oldCell =
@@ -58,13 +59,13 @@ fixCell newNum coord (Puzzle grid) =
             in
             case check newPuzzle of
                 Ok puzzle ->
-                    Ok puzzle
+                    Ok (prune puzzle)
 
                 Err _ ->
                     Err (IllegalNumber coord)
 
 
-clearCell : Coord -> Puzzle Valid -> Puzzle Valid
+clearCell : Coord -> Puzzle Pruned -> Puzzle Pruned
 clearCell coord (Puzzle grid) =
     let
         oldCell =
@@ -78,8 +79,9 @@ clearCell coord (Puzzle grid) =
             Possible Number.setAll notes
                 |> Grid.setByCoord coord grid
                 |> Puzzle
+                |> prune
 
-        Possible _ notes ->
+        Possible _ _ ->
             Puzzle grid
 
 

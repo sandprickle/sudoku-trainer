@@ -31,7 +31,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra exposing (allDifferent)
 import Sudoku.Cell as Cell exposing (Cell)
-import Sudoku.Number as Number exposing (NumSet, Number)
+import Sudoku.Number as Number exposing (NumSet)
 
 
 type Grid

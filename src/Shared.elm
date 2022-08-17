@@ -7,7 +7,6 @@ module Shared exposing
     , update
     )
 
-import Gen.Route as Route
 import Json.Decode as Json
 import Request exposing (Request)
 import Sudoku.Grid as Grid exposing (Grid)
@@ -31,7 +30,7 @@ init _ flags =
 
 
 update : Request -> Msg -> Model -> ( Model, Cmd Msg )
-update req msg model =
+update _ msg model =
     case msg of
         UpdatedPuzzle puzzle ->
             ( { model | currentPuzzle = puzzle }, Cmd.none )

@@ -5,7 +5,7 @@ import Gen.Route as Route
 import Html exposing (Html, div, table, td, text, tr)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Html.Lazy exposing (lazy2)
+import Html.Lazy exposing (lazy3)
 import Page
 import Request
 import Shared
@@ -71,7 +71,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -82,25 +82,9 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     let
-        viewCell :
-            { currentCoord : Coord
-            , selectedCoord : Maybe Coord
-            }
-            -> Cell
-            -> Html Msg
-        viewCell { currentCoord, selectedCoord } cell =
+        viewCell : Coord -> Bool -> Cell -> Html Msg
+        viewCell currentCoord selected cell =
             let
-                { x, y } =
-                    currentCoord
-
-                selected =
-                    case selectedCoord of
-                        Just coord ->
-                            x == coord.x && y == coord.y
-
-                        Nothing ->
-                            False
-
                 twClasses =
                     "h-14 w-14 flex justify-center items-center text-3xl"
             in
@@ -120,10 +104,19 @@ view model =
             tr [] <|
                 List.indexedMap
                     (\x ->
-                        lazy2 viewCell
-                            { currentCoord = { x = x, y = y }
-                            , selectedCoord = model.selectedCell
-                            }
+                        let
+                            currentCoord =
+                                { x = x, y = y }
+
+                            selected =
+                                case model.selectedCell of
+                                    Just coord ->
+                                        coord == currentCoord
+
+                                    Nothing ->
+                                        False
+                        in
+                        lazy3 viewCell currentCoord selected
                     )
                     row
     in
