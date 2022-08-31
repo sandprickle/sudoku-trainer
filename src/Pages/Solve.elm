@@ -6,10 +6,11 @@ import Html exposing (Html, div, table, td, text, tr)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Lazy exposing (lazy3)
+import Keyboard exposing (RawKey)
 import Page
 import Request
 import Shared
-import Sudoku.Cell as Cell exposing (Cell)
+import Sudoku.Cell as Cell exposing (Cell(..))
 import Sudoku.Grid as Grid exposing (Coord, Grid)
 import UI
 import View exposing (View)
@@ -55,6 +56,7 @@ init req puzzle =
 
 type Msg
     = ClickedCell Coord
+    | KeyDown RawKey
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -65,6 +67,55 @@ update msg model =
             , Cmd.none
             )
 
+        KeyDown rawKey ->
+            Debug.todo "handle keyboard input"
+
+
+valueKeys : List String
+valueKeys =
+    [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
+
+
+navKeys : List String
+navKeys =
+    [ "h", "j", "k", "l" ]
+
+
+moveSelectionLeft : Coord -> Coord
+moveSelectionLeft { x, y } =
+    if x == 0 then
+        { x = 8, y = y }
+
+    else
+        { x = x - 1, y = y }
+
+
+moveSelectionRight : Coord -> Coord
+moveSelectionRight { x, y } =
+    if x == 8 then
+        { x = 0, y = y }
+
+    else
+        { x = x + 1, y = y }
+
+
+moveSelectionUp : Coord -> Coord
+moveSelectionUp { x, y } =
+    if y == 0 then
+        { x = x, y = 8 }
+
+    else
+        { x = x, y = y - 1 }
+
+
+moveSelectionDown : Coord -> Coord
+moveSelectionDown { x, y } =
+    if y == 8 then
+        { x = x, y = 0 }
+
+    else
+        { x = x, y = y + 1 }
+
 
 
 -- SUBSCRIPTIONS
@@ -72,7 +123,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Keyboard.downs KeyDown
 
 
 

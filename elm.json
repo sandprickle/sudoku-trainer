@@ -16,6 +16,7 @@
             "elm/url": "1.0.0",
             "elm-community/list-extra": "8.6.0",
             "elm-explorations/benchmark": "1.0.2",
+            "ohanhi/keyboard": "2.0.1",
             "ryannhg/elm-spa": "6.0.0"
         },
         "indirect": {

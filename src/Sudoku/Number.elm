@@ -9,6 +9,7 @@ module Sudoku.Number exposing
     , five
     , four
     , fromChar
+    , fromString
     , nine
     , one
     , setAll
@@ -71,6 +72,40 @@ fromChar char =
             Just (Number 8)
 
         '9' ->
+            Just (Number 9)
+
+        _ ->
+            Nothing
+
+
+fromString : String -> Maybe Number
+fromString str =
+    case str of
+        "1" ->
+            Just (Number 1)
+
+        "2" ->
+            Just (Number 2)
+
+        "3" ->
+            Just (Number 3)
+
+        "4" ->
+            Just (Number 4)
+
+        "5" ->
+            Just (Number 5)
+
+        "6" ->
+            Just (Number 6)
+
+        "7" ->
+            Just (Number 7)
+
+        "8" ->
+            Just (Number 8)
+
+        "9" ->
             Just (Number 9)
 
         _ ->
