@@ -5,7 +5,7 @@ import Gen.Route as Route
 import Html exposing (Html, div, table, td, text, tr)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Html.Lazy exposing (lazy3)
+import Html.Lazy exposing (lazy2)
 import Keyboard exposing (RawKey)
 import Page
 import Request
@@ -35,6 +35,7 @@ page shared req =
 type alias Model =
     { puzzle : Grid
     , selectedCell : Maybe Coord
+    , problemCells : List Coord
     }
 
 
@@ -42,12 +43,18 @@ init : Request.With Params -> Maybe Grid -> ( Model, Cmd Msg )
 init req puzzle =
     case puzzle of
         Nothing ->
-            ( { puzzle = Grid.empty, selectedCell = Nothing }
+            ( { puzzle = Grid.empty
+              , selectedCell = Nothing
+              , problemCells = []
+              }
             , Request.pushRoute Route.Home_ req
             )
 
         Just grid ->
-            ( { puzzle = grid, selectedCell = Nothing }
+            ( { puzzle = grid
+              , selectedCell = Nothing
+              , problemCells = []
+              }
             , Cmd.none
             )
 
@@ -227,43 +234,50 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     let
-        viewCell : Coord -> Bool -> Cell -> Html Msg
-        viewCell currentCoord selected cell =
-            let
-                twClasses =
-                    "h-14 w-14 flex justify-center items-center text-3xl"
-            in
+        viewCell :
+            { coord : Coord
+            , selected : Bool
+            , problem : Bool
+            }
+            -> Cell
+            -> Html Msg
+        viewCell { coord, selected, problem } cell =
             td [ class "border border-zinc-700" ]
                 [ div
                     [ classList
-                        [ ( twClasses ++ " selected", selected )
-                        , ( twClasses, not selected )
+                        [ ( "selected", selected )
+                        , ( "problem", problem )
                         ]
-                    , onClick <| ClickedCell currentCoord
+                    , class
+                        "h-14 w-14 flex justify-center items-center text-3xl"
+                    , onClick <| ClickedCell coord
                     ]
                     [ text (Cell.numberToString cell) ]
                 ]
 
         viewRow : Int -> List Cell -> Html Msg
         viewRow y row =
-            tr [] <|
-                List.indexedMap
+            row
+                |> List.indexedMap
                     (\x ->
                         let
                             currentCoord =
                                 { x = x, y = y }
-
-                            selected =
+                        in
+                        lazy2 viewCell
+                            { coord = currentCoord
+                            , selected =
                                 case model.selectedCell of
                                     Just coord ->
                                         coord == currentCoord
 
                                     Nothing ->
                                         False
-                        in
-                        lazy3 viewCell currentCoord selected
+                            , problem =
+                                List.member currentCoord model.problemCells
+                            }
                     )
-                    row
+                |> tr []
     in
     { title = "Solve"
     , body =
