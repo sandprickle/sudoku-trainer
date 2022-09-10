@@ -77,59 +77,38 @@ update msg model =
                         _ ->
                             ""
             in
-            if Set.member keyStr valueKeys then
-                case model.selectedCell of
-                    Just coord ->
-                        ( model, Cmd.none )
+            case parseAction keyStr of
+                InsertNumber str ->
+                    ( model, Cmd.none )
 
-                    Nothing ->
-                        ( model, Cmd.none )
+                ClearNumber ->
+                    ( model, Cmd.none )
 
-            else if Set.member keyStr navKeys then
-                ( { model | selectedCell = updateSelection keyStr model.selectedCell }
-                , Cmd.none
-                )
+                UpdateSelection action ->
+                    ( { model
+                        | selectedCell =
+                            updateSelection action model.selectedCell
+                      }
+                    , Cmd.none
+                    )
 
-            else
-                ( model, Cmd.none )
-
-
-updateSelection : String -> Maybe Coord -> Maybe Coord
-updateSelection keyStr selectedCell =
-    case selectedCell of
-        Nothing ->
-            Just { x = 4, y = 4 }
-
-        Just coord ->
-            case keyStr of
-                "h" ->
-                    Just (moveSelectionLeft coord)
-
-                "j" ->
-                    Just (moveSelectionDown coord)
-
-                "k" ->
-                    Just (moveSelectionUp coord)
-
-                "l" ->
-                    Just (moveSelectionRight coord)
-
-                _ ->
-                    selectedCell
+                None ->
+                    ( model, Cmd.none )
 
 
 type Action
     = InsertNumber Number
     | ClearNumber
-    | MoveSelectionDown
-    | MoveSelectionUp
-    | MoveSelectionLeft
-    | MoveSelectionRight
+    | UpdateSelection SelectionAction
     | None
 
 
 parseAction : String -> Action
 parseAction str =
+    let
+        valueKeys =
+            Set.fromList [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
+    in
     if Set.member str valueKeys then
         case Number.fromString str of
             Just num ->
@@ -141,65 +120,76 @@ parseAction str =
     else
         case str of
             "h" ->
-                MoveSelectionLeft
+                UpdateSelection MoveLeft
 
             "j" ->
-                MoveSelectionDown
+                UpdateSelection MoveDown
 
             "k" ->
-                MoveSelectionUp
+                UpdateSelection MoveUp
 
             "l" ->
-                MoveSelectionRight
+                UpdateSelection MoveRight
 
             _ ->
                 None
 
 
-valueKeys : Set String
-valueKeys =
-    Set.fromList [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
+type SelectionAction
+    = MoveDown
+    | MoveUp
+    | MoveLeft
+    | MoveRight
 
 
-navKeys : Set String
-navKeys =
-    Set.fromList [ "h", "j", "k", "l" ]
+updateSelection : SelectionAction -> Maybe Coord -> Maybe Coord
+updateSelection action selectedCell =
+    let
+        moveSelectionLeft { x, y } =
+            if x == 0 then
+                { x = 8, y = y }
 
+            else
+                { x = x - 1, y = y }
 
-moveSelectionLeft : Coord -> Coord
-moveSelectionLeft { x, y } =
-    if x == 0 then
-        { x = 8, y = y }
+        moveSelectionRight { x, y } =
+            if x == 8 then
+                { x = 0, y = y }
 
-    else
-        { x = x - 1, y = y }
+            else
+                { x = x + 1, y = y }
 
+        moveSelectionUp { x, y } =
+            if y == 0 then
+                { x = x, y = 8 }
 
-moveSelectionRight : Coord -> Coord
-moveSelectionRight { x, y } =
-    if x == 8 then
-        { x = 0, y = y }
+            else
+                { x = x, y = y - 1 }
 
-    else
-        { x = x + 1, y = y }
+        moveSelectionDown { x, y } =
+            if y == 8 then
+                { x = x, y = 0 }
 
+            else
+                { x = x, y = y + 1 }
+    in
+    case selectedCell of
+        Nothing ->
+            Just { x = 4, y = 4 }
 
-moveSelectionUp : Coord -> Coord
-moveSelectionUp { x, y } =
-    if y == 0 then
-        { x = x, y = 8 }
+        Just coord ->
+            case action of
+                MoveLeft ->
+                    Just (moveSelectionLeft coord)
 
-    else
-        { x = x, y = y - 1 }
+                MoveDown ->
+                    Just (moveSelectionDown coord)
 
+                MoveUp ->
+                    Just (moveSelectionUp coord)
 
-moveSelectionDown : Coord -> Coord
-moveSelectionDown { x, y } =
-    if y == 8 then
-        { x = x, y = 0 }
-
-    else
-        { x = x, y = y + 1 }
+                MoveRight ->
+                    Just (moveSelectionRight coord)
 
 
 
