@@ -326,6 +326,7 @@ clearNumber coord grid =
         Fixed _ notes ->
             Possible Number.setAll notes
                 |> setByCoord coord grid
+                |> resetPossible
                 |> pruneAll
 
 
@@ -346,6 +347,24 @@ insertNumber coord num grid =
             Fixed num notes
                 |> setByCoord coord grid
                 |> pruneAll
+
+
+resetPossible : Grid -> Grid
+resetPossible (Grid arr) =
+    arr
+        |> Array.map
+            (\cell ->
+                case cell of
+                    Fixed _ _ ->
+                        cell
+
+                    Given _ ->
+                        cell
+
+                    Possible _ notes ->
+                        Possible Number.setAll notes
+            )
+        |> Grid
 
 
 
