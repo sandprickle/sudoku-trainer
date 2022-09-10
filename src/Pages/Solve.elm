@@ -13,6 +13,7 @@ import Set exposing (Set)
 import Shared
 import Sudoku.Cell as Cell exposing (Cell(..))
 import Sudoku.Grid as Grid exposing (Coord, Grid)
+import Sudoku.Number as Number exposing (Number)
 import UI
 import View exposing (View)
 
@@ -67,60 +68,92 @@ update msg model =
             ( { model | selectedCell = Just coord }, Cmd.none )
 
         KeyDown rawKey ->
-            handleKeyboardInput rawKey model
+            let
+                keyStr =
+                    case Keyboard.characterKeyOriginal rawKey of
+                        Just (Keyboard.Character str) ->
+                            str
 
-
-handleKeyboardInput : RawKey -> Model -> ( Model, Cmd Msg )
-handleKeyboardInput rawKey model =
-    let
-        keyStr =
-            case Keyboard.characterKeyOriginal rawKey of
-                Just (Keyboard.Character str) ->
-                    str
-
-                _ ->
-                    ""
-    in
-    if Set.member keyStr valueKeys then
-        case model.selectedCell of
-            Just coord ->
-                ( model, Cmd.none )
-
-            Nothing ->
-                ( model, Cmd.none )
-
-    else if Set.member keyStr navKeys then
-        case model.selectedCell of
-            Nothing ->
-                ( { model | selectedCell = Just { x = 4, y = 4 } }, Cmd.none )
-
-            Just coord ->
-                case keyStr of
-                    "h" ->
-                        ( { model | selectedCell = Just (moveSelectionLeft coord) }
-                        , Cmd.none
-                        )
-
-                    "j" ->
-                        ( { model | selectedCell = Just (moveSelectionDown coord) }
-                        , Cmd.none
-                        )
-
-                    "k" ->
-                        ( { model | selectedCell = Just (moveSelectionUp coord) }
-                        , Cmd.none
-                        )
-
-                    "l" ->
-                        ( { model | selectedCell = Just (moveSelectionRight coord) }
-                        , Cmd.none
-                        )
-
-                    _ ->
+                        _ ->
+                            ""
+            in
+            if Set.member keyStr valueKeys then
+                case model.selectedCell of
+                    Just coord ->
                         ( model, Cmd.none )
 
+                    Nothing ->
+                        ( model, Cmd.none )
+
+            else if Set.member keyStr navKeys then
+                ( { model | selectedCell = updateSelection keyStr model.selectedCell }
+                , Cmd.none
+                )
+
+            else
+                ( model, Cmd.none )
+
+
+updateSelection : String -> Maybe Coord -> Maybe Coord
+updateSelection keyStr selectedCell =
+    case selectedCell of
+        Nothing ->
+            Just { x = 4, y = 4 }
+
+        Just coord ->
+            case keyStr of
+                "h" ->
+                    Just (moveSelectionLeft coord)
+
+                "j" ->
+                    Just (moveSelectionDown coord)
+
+                "k" ->
+                    Just (moveSelectionUp coord)
+
+                "l" ->
+                    Just (moveSelectionRight coord)
+
+                _ ->
+                    selectedCell
+
+
+type Action
+    = InsertNumber Number
+    | ClearNumber
+    | MoveSelectionDown
+    | MoveSelectionUp
+    | MoveSelectionLeft
+    | MoveSelectionRight
+    | None
+
+
+parseAction : String -> Action
+parseAction str =
+    if Set.member str valueKeys then
+        case Number.fromString str of
+            Just num ->
+                InsertNumber num
+
+            Nothing ->
+                ClearNumber
+
     else
-        ( model, Cmd.none )
+        case str of
+            "h" ->
+                MoveSelectionLeft
+
+            "j" ->
+                MoveSelectionDown
+
+            "k" ->
+                MoveSelectionUp
+
+            "l" ->
+                MoveSelectionRight
+
+            _ ->
+                None
 
 
 valueKeys : Set String
