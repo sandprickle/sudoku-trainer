@@ -78,11 +78,26 @@ update msg model =
                             ""
             in
             case parseAction keyStr of
-                InsertNumber str ->
-                    ( model, Cmd.none )
+                InsertNumber num ->
+                    case model.selectedCell of
+                        Just coord ->
+                            ( model, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
 
                 ClearNumber ->
-                    ( model, Cmd.none )
+                    case model.selectedCell of
+                        Just coord ->
+                            ( { model
+                                | puzzle =
+                                    clearNumber coord model.puzzle
+                              }
+                            , Cmd.none
+                            )
+
+                        Nothing ->
+                            ( model, Cmd.none )
 
                 UpdateSelection action ->
                     ( { model
@@ -94,6 +109,25 @@ update msg model =
 
                 None ->
                     ( model, Cmd.none )
+
+
+clearNumber : Coord -> Grid -> Grid
+clearNumber coord grid =
+    let
+        cell =
+            Grid.getByCoord coord grid
+    in
+    case cell of
+        Given _ ->
+            grid
+
+        Possible _ _ ->
+            grid
+
+        Fixed _ notes ->
+            Possible Number.setAll notes
+                |> Grid.setByCoord coord grid
+                |> Grid.pruneAll
 
 
 type Action
