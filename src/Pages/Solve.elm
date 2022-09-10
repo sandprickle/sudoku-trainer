@@ -81,7 +81,12 @@ update msg model =
                 InsertNumber num ->
                     case model.selectedCell of
                         Just coord ->
-                            ( model, Cmd.none )
+                            ( { model
+                                | puzzle =
+                                    Grid.insertNumber coord num model.puzzle
+                              }
+                            , Cmd.none
+                            )
 
                         Nothing ->
                             ( model, Cmd.none )
@@ -90,8 +95,7 @@ update msg model =
                     case model.selectedCell of
                         Just coord ->
                             ( { model
-                                | puzzle =
-                                    clearNumber coord model.puzzle
+                                | puzzle = Grid.clearNumber coord model.puzzle
                               }
                             , Cmd.none
                             )
@@ -109,25 +113,6 @@ update msg model =
 
                 None ->
                     ( model, Cmd.none )
-
-
-clearNumber : Coord -> Grid -> Grid
-clearNumber coord grid =
-    let
-        cell =
-            Grid.getByCoord coord grid
-    in
-    case cell of
-        Given _ ->
-            grid
-
-        Possible _ _ ->
-            grid
-
-        Fixed _ notes ->
-            Possible Number.setAll notes
-                |> Grid.setByCoord coord grid
-                |> Grid.pruneAll
 
 
 type Action

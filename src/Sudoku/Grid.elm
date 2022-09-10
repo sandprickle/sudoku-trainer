@@ -1,6 +1,7 @@
 port module Sudoku.Grid exposing
     ( Coord
     , Grid
+    , clearNumber
     , coordDecoder
     , decoder
     , empty
@@ -9,6 +10,7 @@ port module Sudoku.Grid exposing
     , fromJson
     , fromString
     , getByCoord
+    , insertNumber
     , isLegal
     , isSolvable
     , legal
@@ -30,8 +32,8 @@ import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra exposing (allDifferent)
-import Sudoku.Cell as Cell exposing (Cell)
-import Sudoku.Number as Number exposing (NumSet)
+import Sudoku.Cell as Cell exposing (Cell(..))
+import Sudoku.Number as Number exposing (NumSet, Number)
 
 
 type Grid
@@ -302,6 +304,48 @@ pruneCells cells =
 empty : Grid
 empty =
     Array.fromList (List.repeat 81 Cell.default) |> Grid
+
+
+
+-- Puzzle Logic
+
+
+clearNumber : Coord -> Grid -> Grid
+clearNumber coord grid =
+    let
+        cell =
+            getByCoord coord grid
+    in
+    case cell of
+        Given _ ->
+            grid
+
+        Possible _ _ ->
+            grid
+
+        Fixed _ notes ->
+            Possible Number.setAll notes
+                |> setByCoord coord grid
+                |> pruneAll
+
+
+insertNumber : Coord -> Number -> Grid -> Grid
+insertNumber coord num grid =
+    let
+        cell =
+            getByCoord coord grid
+    in
+    case cell of
+        Given _ ->
+            grid
+
+        Fixed _ _ ->
+            grid
+
+        Possible _ notes ->
+            Fixed num notes
+                |> setByCoord coord grid
+                |> pruneAll
 
 
 
