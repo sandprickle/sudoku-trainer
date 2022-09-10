@@ -9,7 +9,7 @@ import Html.Lazy exposing (lazy3)
 import Keyboard exposing (RawKey)
 import Page
 import Request
-import Set exposing (Set)
+import Set
 import Shared
 import Sudoku.Cell as Cell exposing (Cell(..))
 import Sudoku.Grid as Grid exposing (Coord, Grid)
