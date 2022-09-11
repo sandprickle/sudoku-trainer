@@ -79,29 +79,32 @@ isSolvable grid =
 legal : Grid -> Maybe Grid
 legal grid =
     let
+        checkGroup : List Cell -> Bool
+        checkGroup group =
+            group
+                |> List.filterMap Cell.getNumber
+                |> List.Extra.allDifferent
+
         rowsOk =
             grid
                 |> toRows
                 |> List.map checkGroup
                 |> List.member False
+                |> not
 
         colsOk =
             grid
                 |> toCols
                 |> List.map checkGroup
                 |> List.member False
+                |> not
 
         boxesOk =
             grid
                 |> toBoxes
                 |> List.map checkGroup
                 |> List.member False
-
-        checkGroup : List Cell -> Bool
-        checkGroup group =
-            group
-                |> List.filter Cell.isFilled
-                |> allDifferent
+                |> not
     in
     if rowsOk && colsOk && boxesOk then
         Just grid
