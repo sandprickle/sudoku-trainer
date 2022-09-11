@@ -35,7 +35,7 @@ page shared req =
 type alias Model =
     { puzzle : Grid
     , selectedCell : Maybe Coord
-    , problemCells : List Coord
+    , problemCell : Maybe Coord
     }
 
 
@@ -45,7 +45,7 @@ init req puzzle =
         Nothing ->
             ( { puzzle = Grid.empty
               , selectedCell = Nothing
-              , problemCells = []
+              , problemCell = Nothing
               }
             , Request.pushRoute Route.Home_ req
             )
@@ -53,7 +53,7 @@ init req puzzle =
         Just grid ->
             ( { puzzle = grid
               , selectedCell = Nothing
-              , problemCells = []
+              , problemCell = Nothing
               }
             , Cmd.none
             )
@@ -86,17 +86,21 @@ update msg model =
             in
             case parseAction keyStr of
                 InsertNumber num ->
-                    case insertNumber num model.selectedCell model.puzzle of
-                        Ok puzzle ->
-                            ( { model | puzzle = puzzle }, Cmd.none )
+                    if model.problemCell == Nothing then
+                        case insertNumber num model.selectedCell model.puzzle of
+                            Ok puzzle ->
+                                ( { model | puzzle = puzzle }, Cmd.none )
 
-                        Err ( puzzle, coord ) ->
-                            ( { model
-                                | puzzle = puzzle
-                                , problemCells = coord :: model.problemCells
-                              }
-                            , Cmd.none
-                            )
+                            Err ( puzzle, coord ) ->
+                                ( { model
+                                    | puzzle = puzzle
+                                    , problemCell = Just coord
+                                  }
+                                , Cmd.none
+                                )
+
+                    else
+                        ( model, Cmd.none )
 
                 ClearNumber ->
                     ( { model
@@ -323,8 +327,7 @@ view model =
 
                                     Nothing ->
                                         False
-                            , problem =
-                                List.member currentCoord model.problemCells
+                            , problem = model.problemCell == Just currentCoord
                             }
                     )
                 |> tr []
