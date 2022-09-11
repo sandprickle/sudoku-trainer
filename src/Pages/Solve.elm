@@ -103,9 +103,18 @@ update msg model =
                         ( model, Cmd.none )
 
                 ClearNumber ->
-                    ( { model
-                        | puzzle = clearNumber model.selectedCell model.puzzle
-                      }
+                    let
+                        puzzle =
+                            clearNumber model.selectedCell model.puzzle
+
+                        problemCell =
+                            if model.problemCell == model.selectedCell then
+                                Nothing
+
+                            else
+                                model.problemCell
+                    in
+                    ( { model | puzzle = puzzle, problemCell = problemCell }
                     , Cmd.none
                     )
 
