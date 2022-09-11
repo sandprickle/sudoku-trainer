@@ -86,17 +86,17 @@ update msg model =
             in
             case parseAction keyStr of
                 InsertNumber num ->
-                    case model.selectedCell of
-                        Just coord ->
+                    case insertNumber num model.selectedCell model.puzzle of
+                        Ok puzzle ->
+                            ( { model | puzzle = puzzle }, Cmd.none )
+
+                        Err ( puzzle, coord ) ->
                             ( { model
-                                | puzzle =
-                                    Grid.insertNumber coord num model.puzzle
+                                | puzzle = puzzle
+                                , problemCells = coord :: model.problemCells
                               }
                             , Cmd.none
                             )
-
-                        Nothing ->
-                            ( model, Cmd.none )
 
                 ClearNumber ->
                     ( { model
@@ -156,6 +156,36 @@ parseAction str =
                 None
 
 
+insertNumber : Number -> Maybe Coord -> Grid -> Result ( Grid, Coord ) Grid
+insertNumber num selectedCell grid =
+    case selectedCell of
+        Just coord ->
+            let
+                cell =
+                    Grid.getByCoord coord grid
+            in
+            case cell of
+                Given _ ->
+                    Ok grid
+
+                Fixed _ _ ->
+                    Ok grid
+
+                Possible _ notes ->
+                    let
+                        newGrid =
+                            Grid.setByCoord coord grid (Fixed num notes)
+                    in
+                    if Grid.isLegal newGrid then
+                        Ok (Grid.pruneAll newGrid)
+
+                    else
+                        Err ( newGrid, coord )
+
+        Nothing ->
+            Ok grid
+
+
 clearNumber : Maybe Coord -> Grid -> Grid
 clearNumber selectedCell grid =
     case selectedCell of
@@ -179,11 +209,6 @@ clearNumber selectedCell grid =
 
         Nothing ->
             grid
-
-
-insertNumber : Number -> Maybe Coord -> Grid -> Result Grid Grid
-insertNumber num selectedCell grid =
-    Debug.todo "insertNumber"
 
 
 type SelectionAction

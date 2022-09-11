@@ -9,7 +9,6 @@ port module Sudoku.Grid exposing
     , fromJson
     , fromString
     , getByCoord
-    , insertNumber
     , isLegal
     , isSolvable
     , legal
@@ -308,25 +307,6 @@ empty =
 
 
 -- Puzzle Logic
-
-
-insertNumber : Coord -> Number -> Grid -> Grid
-insertNumber coord num grid =
-    let
-        cell =
-            getByCoord coord grid
-    in
-    case cell of
-        Given _ ->
-            grid
-
-        Fixed _ _ ->
-            grid
-
-        Possible _ notes ->
-            Fixed num notes
-                |> setByCoord coord grid
-                |> pruneAll
 
 
 resetPossible : Grid -> Grid
