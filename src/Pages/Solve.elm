@@ -99,16 +99,11 @@ update msg model =
                             ( model, Cmd.none )
 
                 ClearNumber ->
-                    case model.selectedCell of
-                        Just coord ->
-                            ( { model
-                                | puzzle = Grid.clearNumber coord model.puzzle
-                              }
-                            , Cmd.none
-                            )
-
-                        Nothing ->
-                            ( model, Cmd.none )
+                    ( { model
+                        | puzzle = clearNumber model.selectedCell model.puzzle
+                      }
+                    , Cmd.none
+                    )
 
                 UpdateSelection action ->
                     ( { model
@@ -159,6 +154,36 @@ parseAction str =
 
             _ ->
                 None
+
+
+clearNumber : Maybe Coord -> Grid -> Grid
+clearNumber selectedCell grid =
+    case selectedCell of
+        Just coord ->
+            let
+                cell =
+                    Grid.getByCoord coord grid
+            in
+            case cell of
+                Given _ ->
+                    grid
+
+                Possible _ _ ->
+                    grid
+
+                Fixed _ notes ->
+                    Possible Number.setAll notes
+                        |> Grid.setByCoord coord grid
+                        |> Grid.resetPossible
+                        |> Grid.pruneAll
+
+        Nothing ->
+            grid
+
+
+insertNumber : Number -> Maybe Coord -> Grid -> Result Grid Grid
+insertNumber num selectedCell grid =
+    Debug.todo "insertNumber"
 
 
 type SelectionAction

@@ -1,7 +1,6 @@
 port module Sudoku.Grid exposing
     ( Coord
     , Grid
-    , clearNumber
     , coordDecoder
     , decoder
     , empty
@@ -18,6 +17,7 @@ port module Sudoku.Grid exposing
     , preview
     , pruneAll
     , receiver
+    , resetPossible
     , save
     , setByCoord
     , solvable
@@ -308,26 +308,6 @@ empty =
 
 
 -- Puzzle Logic
-
-
-clearNumber : Coord -> Grid -> Grid
-clearNumber coord grid =
-    let
-        cell =
-            getByCoord coord grid
-    in
-    case cell of
-        Given _ ->
-            grid
-
-        Possible _ _ ->
-            grid
-
-        Fixed _ notes ->
-            Possible Number.setAll notes
-                |> setByCoord coord grid
-                |> resetPossible
-                |> pruneAll
 
 
 insertNumber : Coord -> Number -> Grid -> Grid
