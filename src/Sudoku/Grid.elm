@@ -84,21 +84,18 @@ legal grid =
                 |> toRows
                 |> List.map checkGroup
                 |> List.member False
-                |> not
 
         colsOk =
             grid
                 |> toCols
                 |> List.map checkGroup
                 |> List.member False
-                |> not
 
         boxesOk =
             grid
                 |> toBoxes
                 |> List.map checkGroup
                 |> List.member False
-                |> not
 
         checkGroup : List Cell -> Bool
         checkGroup group =
