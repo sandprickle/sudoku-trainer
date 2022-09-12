@@ -36,7 +36,7 @@ suite =
                             |> Cell.initFromChar
                             |> Cell.getPossible
                             |> Expect.equal
-                                (Just Number.all)
+                                (Just Number.setAll)
                 ]
             ]
         ]
