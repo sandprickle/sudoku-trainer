@@ -70,9 +70,18 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        saveCmd =
+            case model.problemCell of
+                Just _ ->
+                    Cmd.none
+
+                Nothing ->
+                    Grid.save model.puzzle
+    in
     case msg of
         ClickedCell coord ->
-            ( { model | selectedCell = Just coord }, Cmd.none )
+            ( { model | selectedCell = Just coord }, saveCmd )
 
         KeyDown rawKey ->
             let
@@ -89,7 +98,9 @@ update msg model =
                     if model.problemCell == Nothing then
                         case insertNumber num model.selectedCell model.puzzle of
                             Ok puzzle ->
-                                ( { model | puzzle = puzzle }, Cmd.none )
+                                ( { model | puzzle = puzzle }
+                                , saveCmd
+                                )
 
                             Err ( puzzle, coord ) ->
                                 ( { model
@@ -115,7 +126,7 @@ update msg model =
                                 model.problemCell
                     in
                     ( { model | puzzle = puzzle, problemCell = problemCell }
-                    , Cmd.none
+                    , saveCmd
                     )
 
                 UpdateSelection action ->
@@ -123,11 +134,11 @@ update msg model =
                         | selectedCell =
                             updateSelection action model.selectedCell
                       }
-                    , Cmd.none
+                    , saveCmd
                     )
 
                 None ->
-                    ( model, Cmd.none )
+                    ( model, saveCmd )
 
 
 type Action
@@ -305,11 +316,24 @@ view model =
             -> Cell
             -> Html Msg
         viewCell { coord, selected, problem } cell =
+            let
+                given =
+                    case cell of
+                        Given _ ->
+                            True
+
+                        Fixed _ _ ->
+                            False
+
+                        Possible _ _ ->
+                            False
+            in
             td [ class "border border-zinc-700" ]
                 [ div
                     [ classList
                         [ ( "selected", selected )
                         , ( "problem", problem )
+                        , ( "given", given )
                         ]
                     , class
                         "h-14 w-14 flex justify-center items-center text-3xl"
