@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "elm-review": "^2.7.5",
     "elm-tooling": "^1.8.0"
   }
 }
