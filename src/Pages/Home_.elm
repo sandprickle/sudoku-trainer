@@ -7,12 +7,12 @@ import Html.Attributes exposing (class, href)
 import Page
 import Request
 import Shared
-import Sudoku.Grid as Grid exposing (Grid)
+import Sudoku.Puzzle as Puzzle exposing (Puzzle)
 import UI
 import View exposing (View)
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
+page : Shared.Model a -> Request.With Params -> Page.With (Model a) Msg
 page shared _ =
     Page.element
         { init = init shared.currentPuzzle
@@ -26,11 +26,11 @@ page shared _ =
 -- INIT
 
 
-type alias Model =
-    { currentPuzzle : Maybe Grid }
+type alias Model a =
+    { currentPuzzle : Maybe (Puzzle a) }
 
 
-init : Maybe Grid -> ( Model, Cmd Msg )
+init : Maybe (Puzzle a) -> ( Model a, Cmd Msg )
 init puzzle =
     ( { currentPuzzle = puzzle }
     , Cmd.none
@@ -41,14 +41,14 @@ type Msg
     = ClickedNewPuzzle
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model a -> ( Model b, Cmd Msg )
 update msg model =
     case msg of
         ClickedNewPuzzle ->
             ( model, Cmd.none )
 
 
-view : Model -> View Msg
+view : Model a -> View Msg
 view model =
     { title = "Sudoku Trainer"
     , body =
@@ -57,10 +57,10 @@ view model =
                 Nothing ->
                     viewNewPuzzle
 
-                Just grid ->
+                Just puzzle ->
                     div [ class "grid grid-cols-2 gap-8" ]
                         [ div []
-                            [ Grid.preview grid
+                            [ UI.previewPuzzle puzzle
                             , div [ class "text-center" ]
                                 [ a
                                     [ class "btn mt-4 inline-block"
@@ -78,7 +78,7 @@ view model =
 viewNewPuzzle : Html Msg
 viewNewPuzzle =
     div []
-        [ Grid.preview Grid.empty
+        [ UI.previewPuzzle Puzzle.empty
         , div [ class "text-center" ]
             [ a
                 [ class "btn mt-4 inline-block"
@@ -89,6 +89,6 @@ viewNewPuzzle =
         ]
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model a -> Sub Msg
 subscriptions _ =
     Sub.none

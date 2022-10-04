@@ -14,11 +14,12 @@ import Shared
 import Sudoku.Cell as Cell exposing (Cell(..))
 import Sudoku.Grid as Grid exposing (Coord, Grid)
 import Sudoku.Number as Number exposing (Number)
+import Sudoku.Puzzle as Puzzle exposing (Puzzle)
 import UI
 import View exposing (View)
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
+page : Shared.Model a -> Request.With Params -> Page.With (Model a) Msg
 page shared req =
     Page.element
         { init = init req shared.currentPuzzle
@@ -32,18 +33,18 @@ page shared req =
 -- INIT
 
 
-type alias Model =
-    { puzzle : Grid
+type alias Model a =
+    { puzzle : Puzzle a
     , selectedCell : Maybe Coord
     , problemCell : Maybe Coord
     }
 
 
-init : Request.With Params -> Maybe Grid -> ( Model, Cmd Msg )
+init : Request.With Params -> Maybe (Puzzle a) -> ( Model a, Cmd Msg )
 init req puzzle =
     case puzzle of
         Nothing ->
-            ( { puzzle = Grid.empty
+            ( { puzzle = Puzzle.empty
               , selectedCell = Nothing
               , problemCell = Nothing
               }
@@ -68,7 +69,7 @@ type Msg
     | KeyDown RawKey
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         saveCmd =
@@ -77,7 +78,7 @@ update msg model =
                     Cmd.none
 
                 Nothing ->
-                    Grid.save model.puzzle
+                    Puzzle.save model.puzzle
     in
     case msg of
         ClickedCell coord ->
@@ -96,19 +97,24 @@ update msg model =
             case parseAction keyStr of
                 InsertNumber num ->
                     if model.problemCell == Nothing then
-                        case insertNumber num model.selectedCell model.puzzle of
-                            Ok puzzle ->
-                                ( { model | puzzle = puzzle }
-                                , saveCmd
-                                )
+                        case model.selectedCell of
+                            Just selectedCell ->
+                                case Puzzle.insertNumber num selectedCell model.puzzle of
+                                    Ok puzzle ->
+                                        ( { model | puzzle = puzzle }
+                                        , saveCmd
+                                        )
 
-                            Err ( puzzle, coord ) ->
-                                ( { model
-                                    | puzzle = puzzle
-                                    , problemCell = Just coord
-                                  }
-                                , Cmd.none
-                                )
+                                    Err ( puzzle, coord ) ->
+                                        ( { model
+                                            | puzzle = puzzle
+                                            , problemCell = Just coord
+                                          }
+                                        , Cmd.none
+                                        )
+
+                            Nothing ->
+                                ( model, Cmd.none )
 
                     else
                         ( model, Cmd.none )
@@ -116,7 +122,7 @@ update msg model =
                 ClearNumber ->
                     let
                         puzzle =
-                            clearNumber model.selectedCell model.puzzle
+                            Puzzle.clearNumber model.selectedCell model.puzzle
 
                         problemCell =
                             if model.problemCell == model.selectedCell then
@@ -296,7 +302,7 @@ updateSelection action selectedCell =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model a -> Sub Msg
 subscriptions _ =
     Keyboard.downs KeyDown
 
@@ -305,7 +311,7 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> View Msg
+view : Model a -> View Msg
 view model =
     let
         viewCell :
@@ -369,6 +375,6 @@ view model =
     , body =
         UI.layout
             [ table [ class "puzzle border-2 border-zinc-500" ]
-                (List.indexedMap viewRow (Grid.toRows model.puzzle))
+                (List.indexedMap viewRow (Puzzle.rows model.puzzle))
             ]
     }

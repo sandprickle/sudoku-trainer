@@ -9,33 +9,42 @@ module Shared exposing
 
 import Json.Decode as Json
 import Request exposing (Request)
-import Sudoku.Grid as Grid exposing (Grid)
+import Sudoku.Puzzle as Puzzle exposing (Puzzle)
 
 
 type alias Flags =
     Json.Value
 
 
-type alias Model =
-    { currentPuzzle : Maybe Grid }
+type alias Model a =
+    { currentPuzzle : Maybe (Puzzle a) }
 
 
-type Msg
-    = UpdatedPuzzle (Maybe Grid)
+type Msg a
+    = UpdatedPuzzle (Maybe (Puzzle a))
 
 
-init : Request -> Flags -> ( Model, Cmd Msg )
+init : Request -> Flags -> ( Model Puzzle.Unknown, Cmd (Msg a) )
 init _ flags =
-    ( { currentPuzzle = Grid.fromJson flags }, Cmd.none )
+    let
+        currentPuzzle =
+            case Json.decodeValue Puzzle.decoder flags of
+                Ok puzzle ->
+                    Just puzzle
+
+                Err _ ->
+                    Nothing
+    in
+    ( { currentPuzzle = currentPuzzle }, Cmd.none )
 
 
-update : Request -> Msg -> Model -> ( Model, Cmd Msg )
+update : Request -> Msg a -> Model a -> ( Model a, Cmd (Msg a) )
 update _ msg model =
     case msg of
         UpdatedPuzzle puzzle ->
             ( { model | currentPuzzle = puzzle }, Cmd.none )
 
 
-subscriptions : Request -> Model -> Sub Msg
+subscriptions : Request -> Model a -> Sub (Msg Puzzle.Unknown)
 subscriptions _ _ =
-    Grid.receiver UpdatedPuzzle
+    Puzzle.receiver UpdatedPuzzle

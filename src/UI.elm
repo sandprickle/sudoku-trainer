@@ -1,8 +1,10 @@
-module UI exposing (layout)
+module UI exposing (layout, previewPuzzle)
 
 import Gen.Route as Route
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
+import Sudoku.Cell as Cell
+import Sudoku.Puzzle as Puzzle exposing (Puzzle)
 import Svg exposing (path, svg)
 import Svg.Attributes as SvgAttr
 
@@ -48,3 +50,21 @@ layout children =
             children
         ]
     ]
+
+
+previewPuzzle : Puzzle a -> Html msg
+previewPuzzle puzzle =
+    let
+        rows =
+            Puzzle.rows puzzle
+
+        viewCell cell =
+            Html.td []
+                [ Html.div [] [ Html.text (Cell.numberToString cell) ] ]
+
+        viewRow row =
+            Html.tr [] (List.map viewCell row)
+    in
+    Html.table
+        [ Html.Attributes.class "puzzle-preview border-2 border-gray-400" ]
+        (List.map viewRow rows)

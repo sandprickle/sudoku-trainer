@@ -15,12 +15,12 @@ import Html.Events exposing (onClick, onInput)
 import Page
 import Request
 import Shared
-import Sudoku.Grid as Grid
+import Sudoku.Puzzle as Puzzle
 import UI
 import View exposing (View)
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
+page : Shared.Model a -> Request.With Params -> Page.With Model Msg
 page _ req =
     Page.element
         { init = init
@@ -62,7 +62,7 @@ update req msg model =
         ClickedStart ->
             ( model
             , Cmd.batch
-                [ Grid.save (Grid.fromString model.input)
+                [ Puzzle.save (Puzzle.fromString model.input)
                 , Request.pushRoute Route.Solve req
                 ]
             )
@@ -102,7 +102,7 @@ view model =
                         , class "bg-slate-800 tracking-huge leading-8 font-mono"
                         ]
                         []
-                    , Grid.preview (Grid.fromString model.input)
+                    , UI.previewPuzzle (Puzzle.fromString model.input)
                     ]
                 , div [ class "flex justify-center mt-4" ]
                     [ button
