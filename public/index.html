@@ -1,36 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-      tailwind.config = {
-        content: ['./index.html', './src/**/*.{html,js,elm}'],
-        theme: {
-          extend: {
-            gridTemplateColumns: {
-              layout: '1fr',
-            },
 
-            gridTemplateRows: {
-              layout: 'auto 1fr',
-            },
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      content: ['./index.html', './src/**/*.{html,js,elm}'],
+      theme: {
+        extend: {
+          gridTemplateColumns: {
+            layout: '1fr',
+          },
 
-            colors: {
-              primary: tailwind.colors.rose[700],
-            },
+          gridTemplateRows: {
+            layout: 'auto 1fr',
+          },
 
-            letterSpacing: {
-              huge: '1em',
-            },
+          colors: {
+            primary: tailwind.colors.rose[700],
+          },
+
+          letterSpacing: {
+            huge: '1em',
           },
         },
-      }
-    </script>
+      },
+    }
+  </script>
 
-    <style type="text/tailwindcss">
-      body {
+  <style type="text/tailwindcss">
+    body {
         @apply bg-zinc-900 text-zinc-300 h-screen w-screen;
       }
 
@@ -62,6 +63,9 @@
       .puzzle td:nth-of-type(3n) {
         @apply border-r-2 border-r-zinc-500;
       }
+      .puzzle td {
+        @apply text-rose-300;
+      }
       .puzzle td .selected {
         @apply border-2 border-primary bg-zinc-800;
       }
@@ -69,27 +73,29 @@
         @apply bg-red-900;
       }
       .puzzle td .given {
-        @apply text-rose-300;
+        @apply text-zinc-300;
       }
       
     </style>
-  </head>
-  <body>
-    <script src="/dist/elm.js"></script>
-    <script>
-      const gridKey = 'grid'
-      const app = Elm.Main.init({
-        flags: JSON.parse(localStorage.getItem(gridKey)),
-      })
+</head>
 
-      app.ports.saveGrid.subscribe((grid) => {
-        localStorage.setItem(gridKey, JSON.stringify(grid))
-        app.ports.gridReceiver.send(grid)
-      })
+<body>
+  <script src="/dist/elm.js"></script>
+  <script>
+    const gridKey = 'grid'
+    const app = Elm.Main.init({
+      flags: JSON.parse(localStorage.getItem(gridKey)),
+    })
 
-      app.ports.loadGrid.subscribe(() => {
-        app.ports.gridReceiver.send(JSON.parse(localStorage.getItem(gridKey)))
-      })
-    </script>
-  </body>
+    app.ports.saveGrid.subscribe((grid) => {
+      localStorage.setItem(gridKey, JSON.stringify(grid))
+      app.ports.gridReceiver.send(grid)
+    })
+
+    app.ports.loadGrid.subscribe(() => {
+      app.ports.gridReceiver.send(JSON.parse(localStorage.getItem(gridKey)))
+    })
+  </script>
+</body>
+
 </html>
