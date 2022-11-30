@@ -328,19 +328,16 @@ view model =
                         Possible _ _ ->
                             False
             in
-            td [ class "border border-zinc-700" ]
-                [ div
-                    [ classList
-                        [ ( "selected", selected )
-                        , ( "problem", problem )
-                        , ( "given", given )
-                        ]
-                    , class
-                        "h-14 w-14 flex justify-center items-center text-3xl"
-                    , onClick <| ClickedCell coord
+            td
+                [ class UI.theme.cell
+                , classList
+                    [ ( "selected", selected )
+                    , ( "problem", problem )
+                    , ( "given", given )
                     ]
-                    [ text (Cell.numberToString cell) ]
+                , onClick <| ClickedCell coord
                 ]
+                [ text (Cell.numberToString cell) ]
 
         viewRow : Int -> List Cell -> Html Msg
         viewRow y row =
@@ -368,7 +365,7 @@ view model =
     { title = "Solve"
     , body =
         UI.layout
-            [ table [ class "puzzle border-2 border-zinc-500" ]
+            [ table [ class ("puzzle " ++ UI.theme.puzzleBorder) ]
                 (List.indexedMap viewRow (Grid.toRows model.puzzle))
             ]
     }

@@ -1,4 +1,4 @@
-module UI exposing (layout)
+module UI exposing (layout, theme)
 
 import Gen.Route as Route
 import Html exposing (..)
@@ -48,3 +48,10 @@ layout children =
             children
         ]
     ]
+
+
+theme =
+    { cell =
+        "border border-zinc-700 h-14 w-14 flex justify-center items-center text-3xl"
+    , puzzleBorder = "border-2 border-zinc-500"
+    }
