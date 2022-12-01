@@ -44,14 +44,6 @@ init default =
         }
 
 
-setArray : Grid a -> Array a -> Grid a
-setArray (Grid { default }) newArray =
-    Grid
-        { array = newArray
-        , default = default
-        }
-
-
 
 -- Get/Set by Coord
 
@@ -67,6 +59,13 @@ setByCoord coord grid newCell =
     let
         (Grid { array }) =
             grid
+
+        setArray : Grid a -> Array a -> Grid a
+        setArray (Grid { default }) newArray =
+            Grid
+                { array = newArray
+                , default = default
+                }
     in
     array
         |> Array.set (coordToIndex coord) newCell
