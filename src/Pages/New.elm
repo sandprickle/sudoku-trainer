@@ -12,10 +12,13 @@ import Html.Attributes
         , value
         )
 import Html.Events exposing (onClick, onInput)
+import Keyboard exposing (RawKey)
 import Page
 import Request
+import Set
 import Shared
 import Sudoku.Grid as Grid
+import Sudoku.Number as Number exposing (Number)
 import UI
 import View exposing (View)
 
@@ -49,16 +52,19 @@ init =
 
 
 type Msg
-    = PuzzleInput String
+    = Edit EditAction
     | ClickedStart
+    | KeyDown RawKey
+
+
+type EditAction
+    = Append String
+    | Delete
 
 
 update : Request.With Params -> Msg -> Model -> ( Model, Cmd Msg )
 update req msg model =
     case msg of
-        PuzzleInput str ->
-            ( { model | input = str }, Cmd.none )
-
         ClickedStart ->
             ( model
             , Cmd.batch
@@ -67,6 +73,50 @@ update req msg model =
                 ]
             )
 
+        KeyDown rawKey ->
+            case parseRawKey rawKey of
+                Just action ->
+                    case action of
+                        Append str ->
+                            ( { model | input = model.input ++ str }
+                            , Cmd.none
+                            )
+
+                        Delete ->
+                            ( { model | input = String.dropRight 1 model.input }
+                            , Cmd.none
+                            )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+
+parseRawKey : RawKey -> Maybe EditAction
+parseRawKey rawKey =
+    let
+        parseKey =
+            Keyboard.oneOf [ Keyboard.characterKeyOriginal, Keyboard.editingKey ]
+
+        numberKeys =
+            Set.fromList [ "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
+
+        deleteKeys =
+            Set.fromList [ "0", "Backspace" ]
+    in
+    case parseKey rawKey of
+        Just key ->
+            if Set.member key numberKeys then
+                Just (Append key)
+
+            else if Set.member key deleteKeys then
+                Just Delete
+
+            else
+                Nothing
+
+        Nothing ->
+            Nothing
+
 
 
 -- SUBSCRIPTIONS
@@ -74,7 +124,7 @@ update req msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Keyboard.downs KeyDown
 
 
 
