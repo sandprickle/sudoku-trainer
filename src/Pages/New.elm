@@ -12,7 +12,7 @@ import Html.Attributes
         , value
         )
 import Html.Events exposing (onClick, onInput)
-import Keyboard exposing (RawKey)
+import Keyboard exposing (Key, RawKey)
 import Page
 import Request
 import Set
@@ -90,12 +90,28 @@ update req msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+        _ ->
+            ( model, Cmd.none )
+
 
 parseRawKey : RawKey -> Maybe EditAction
 parseRawKey rawKey =
     let
-        parseKey =
-            Keyboard.oneOf [ Keyboard.characterKeyOriginal, Keyboard.editingKey ]
+        validKeys =
+            Set.fromList
+                [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Backspace" ]
+
+        parseKey : RawKey -> Maybe String
+        parseKey input =
+            let
+                keyString =
+                    Keyboard.rawValue input
+            in
+            if Set.member keyString validKeys then
+                Just keyString
+
+            else
+                Nothing
 
         numberKeys =
             Set.fromList [ "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
@@ -104,11 +120,11 @@ parseRawKey rawKey =
             Set.fromList [ "0", "Backspace" ]
     in
     case parseKey rawKey of
-        Just key ->
-            if Set.member key numberKeys then
-                Just (Append key)
+        Just keyString ->
+            if Set.member keyString numberKeys then
+                Just (Append keyString)
 
-            else if Set.member key deleteKeys then
+            else if Set.member keyString deleteKeys then
                 Just Delete
 
             else
@@ -148,7 +164,6 @@ view model =
                         , autofocus True
                         , spellcheck False
                         , value model.input
-                        , onInput PuzzleInput
                         , class "bg-slate-800 tracking-huge leading-8 font-mono"
                         ]
                         []
