@@ -17,8 +17,8 @@ import Page
 import Request
 import Set
 import Shared
-import Sudoku.Grid as Grid
 import Sudoku.Number as Number exposing (Number)
+import Sudoku.SolveGrid as SolveGrid
 import UI
 import View exposing (View)
 
@@ -68,7 +68,7 @@ update req msg model =
         ClickedStart ->
             ( model
             , Cmd.batch
-                [ Grid.save (Grid.fromString model.input)
+                [ SolveGrid.save (SolveGrid.fromString model.input)
                 , Request.pushRoute Route.Solve req
                 ]
             )
@@ -167,7 +167,7 @@ view model =
                         , class "bg-slate-800 tracking-huge leading-8 font-mono"
                         ]
                         []
-                    , Grid.preview (Grid.fromString model.input)
+                    , SolveGrid.preview (SolveGrid.fromString model.input)
                     ]
                 , div [ class "flex justify-center mt-4" ]
                     [ button

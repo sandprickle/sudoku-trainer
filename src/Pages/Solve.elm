@@ -12,8 +12,8 @@ import Request
 import Set
 import Shared
 import Sudoku.Cell as Cell exposing (Cell(..))
-import Sudoku.Grid as Grid exposing (Coord, Grid)
 import Sudoku.Number as Number exposing (Number)
+import Sudoku.SolveGrid as SolveGrid exposing (Coord, SolveGrid)
 import UI
 import View exposing (View)
 
@@ -33,17 +33,17 @@ page shared req =
 
 
 type alias Model =
-    { puzzle : Grid
+    { puzzle : SolveGrid
     , selectedCell : Maybe Coord
     , problemCell : Maybe Coord
     }
 
 
-init : Request.With Params -> Maybe Grid -> ( Model, Cmd Msg )
+init : Request.With Params -> Maybe SolveGrid -> ( Model, Cmd Msg )
 init req puzzle =
     case puzzle of
         Nothing ->
-            ( { puzzle = Grid.empty
+            ( { puzzle = SolveGrid.empty
               , selectedCell = Nothing
               , problemCell = Nothing
               }
@@ -77,7 +77,7 @@ update msg model =
                     Cmd.none
 
                 Nothing ->
-                    Grid.save model.puzzle
+                    SolveGrid.save model.puzzle
     in
     case msg of
         ClickedCell coord ->
@@ -180,13 +180,13 @@ parseAction str =
                 None
 
 
-insertNumber : Number -> Maybe Coord -> Grid -> Result ( Grid, Coord ) Grid
+insertNumber : Number -> Maybe Coord -> SolveGrid -> Result ( SolveGrid, Coord ) SolveGrid
 insertNumber num selectedCell grid =
     case selectedCell of
         Just coord ->
             let
                 cell =
-                    Grid.getByCoord coord grid
+                    SolveGrid.getByCoord coord grid
             in
             case cell of
                 Given _ ->
@@ -197,26 +197,26 @@ insertNumber num selectedCell grid =
 
                 Possible _ notes ->
                     let
-                        newGrid =
-                            Grid.setByCoord coord grid (Fixed num notes)
+                        newSolveGrid =
+                            SolveGrid.setByCoord coord grid (Fixed num notes)
                     in
-                    if Grid.isLegal newGrid then
-                        Ok (Grid.pruneAll newGrid)
+                    if SolveGrid.isLegal newSolveGrid then
+                        Ok (SolveGrid.pruneAll newSolveGrid)
 
                     else
-                        Err ( newGrid, coord )
+                        Err ( newSolveGrid, coord )
 
         Nothing ->
             Ok grid
 
 
-clearNumber : Maybe Coord -> Grid -> Grid
+clearNumber : Maybe Coord -> SolveGrid -> SolveGrid
 clearNumber selectedCell grid =
     case selectedCell of
         Just coord ->
             let
                 cell =
-                    Grid.getByCoord coord grid
+                    SolveGrid.getByCoord coord grid
             in
             case cell of
                 Given _ ->
@@ -227,9 +227,9 @@ clearNumber selectedCell grid =
 
                 Fixed _ notes ->
                     Possible Number.setAll notes
-                        |> Grid.setByCoord coord grid
-                        |> Grid.resetPossible
-                        |> Grid.pruneAll
+                        |> SolveGrid.setByCoord coord grid
+                        |> SolveGrid.resetPossible
+                        |> SolveGrid.pruneAll
 
         Nothing ->
             grid
@@ -366,6 +366,6 @@ view model =
     , body =
         UI.layout
             [ table [ class ("puzzle " ++ UI.theme.puzzleBorder) ]
-                (List.indexedMap viewRow (Grid.toRows model.puzzle))
+                (List.indexedMap viewRow (SolveGrid.toRows model.puzzle))
             ]
     }

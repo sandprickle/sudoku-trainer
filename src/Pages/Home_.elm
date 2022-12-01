@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, href)
 import Page
 import Request
 import Shared
-import Sudoku.Grid as Grid exposing (Grid)
+import Sudoku.SolveGrid as SolveGrid exposing (SolveGrid)
 import UI
 import View exposing (View)
 
@@ -27,10 +27,10 @@ page shared _ =
 
 
 type alias Model =
-    { currentPuzzle : Maybe Grid }
+    { currentPuzzle : Maybe SolveGrid }
 
 
-init : Maybe Grid -> ( Model, Cmd Msg )
+init : Maybe SolveGrid -> ( Model, Cmd Msg )
 init puzzle =
     ( { currentPuzzle = puzzle }
     , Cmd.none
@@ -60,7 +60,7 @@ view model =
                 Just grid ->
                     div [ class "grid grid-cols-2 gap-8" ]
                         [ div []
-                            [ Grid.preview grid
+                            [ SolveGrid.preview grid
                             , div [ class "text-center" ]
                                 [ a
                                     [ class "btn mt-4 inline-block"
@@ -78,7 +78,7 @@ view model =
 viewNewPuzzle : Html Msg
 viewNewPuzzle =
     div []
-        [ Grid.preview Grid.empty
+        [ SolveGrid.preview SolveGrid.empty
         , div [ class "text-center" ]
             [ a
                 [ class "btn mt-4 inline-block"

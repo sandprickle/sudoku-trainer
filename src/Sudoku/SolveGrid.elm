@@ -1,6 +1,6 @@
-port module Sudoku.Grid exposing
+port module Sudoku.SolveGrid exposing
     ( Coord
-    , Grid
+    , SolveGrid
     , coordDecoder
     , decoder
     , empty
@@ -35,15 +35,15 @@ import Sudoku.Cell as Cell exposing (Cell(..))
 import Sudoku.Number as Number exposing (NumSet)
 
 
-type Grid
-    = Grid (Array Cell)
+type SolveGrid
+    = SolveGrid (Array Cell)
 
 
 
--- New Grid from String
+-- New SolveGrid from String
 
 
-fromString : String -> Grid
+fromString : String -> SolveGrid
 fromString str =
     String.trim str
         |> String.left 81
@@ -51,32 +51,32 @@ fromString str =
         |> String.toList
         |> List.map Cell.initFromChar
         |> Array.fromList
-        |> Grid
+        |> SolveGrid
 
 
 
 -- Validity Checks
 
 
-solvable : Grid -> Maybe Grid
-solvable (Grid grid) =
+solvable : SolveGrid -> Maybe SolveGrid
+solvable (SolveGrid grid) =
     let
         givenNumbers =
             Array.filter Cell.isGiven grid
     in
     if Array.length givenNumbers >= 17 then
-        Just (Grid grid)
+        Just (SolveGrid grid)
 
     else
         Nothing
 
 
-isSolvable : Grid -> Bool
+isSolvable : SolveGrid -> Bool
 isSolvable grid =
     solvable grid /= Nothing
 
 
-legal : Grid -> Maybe Grid
+legal : SolveGrid -> Maybe SolveGrid
 legal grid =
     let
         checkGroup : List Cell -> Bool
@@ -113,7 +113,7 @@ legal grid =
         Nothing
 
 
-isLegal : Grid -> Bool
+isLegal : SolveGrid -> Bool
 isLegal grid =
     legal grid /= Nothing
 
@@ -122,31 +122,31 @@ isLegal grid =
 -- Get/set by Coord
 
 
-getByCoord : Coord -> Grid -> Cell
-getByCoord coord (Grid grid) =
+getByCoord : Coord -> SolveGrid -> Cell
+getByCoord coord (SolveGrid grid) =
     Array.get (coordToIndex coord) grid |> Maybe.withDefault Cell.default
 
 
-setByCoord : Coord -> Grid -> Cell -> Grid
-setByCoord coord (Grid grid) newCell =
-    Array.set (coordToIndex coord) newCell grid |> Grid
+setByCoord : Coord -> SolveGrid -> Cell -> SolveGrid
+setByCoord coord (SolveGrid grid) newCell =
+    Array.set (coordToIndex coord) newCell grid |> SolveGrid
 
 
 
 -- Convert to List of Rows, Cols, or Boxes
 
 
-toRows : Grid -> List (List Cell)
+toRows : SolveGrid -> List (List Cell)
 toRows grid =
     List.map (\n -> getRow n grid) (List.range 0 8)
 
 
-toCols : Grid -> List (List Cell)
+toCols : SolveGrid -> List (List Cell)
 toCols grid =
     List.map (\n -> getCol n grid) (List.range 0 8)
 
 
-toBoxes : Grid -> List (List Cell)
+toBoxes : SolveGrid -> List (List Cell)
 toBoxes grid =
     List.map (\n -> getBox n grid) (List.range 0 8)
 
@@ -155,17 +155,17 @@ toBoxes grid =
 -- Get a Specific row, col, or box as a List
 
 
-getRow : Int -> Grid -> List Cell
+getRow : Int -> SolveGrid -> List Cell
 getRow rowNum grid =
     List.map (\coord -> getByCoord coord grid) (rowCoords rowNum)
 
 
-getCol : Int -> Grid -> List Cell
+getCol : Int -> SolveGrid -> List Cell
 getCol colNum grid =
     List.map (\coord -> getByCoord coord grid) (colCoords colNum)
 
 
-getBox : Int -> Grid -> List Cell
+getBox : Int -> SolveGrid -> List Cell
 getBox boxNum grid =
     List.map (\coord -> getByCoord coord grid) (boxCoords boxNum)
 
@@ -220,7 +220,7 @@ boxCoords boxNum =
 -- Possible Value Pruning
 
 
-pruneAll : Grid -> Grid
+pruneAll : SolveGrid -> SolveGrid
 pruneAll grid =
     let
         newGrid =
@@ -236,7 +236,7 @@ pruneAll grid =
         pruneAll newGrid
 
 
-pruneRows : Grid -> Grid
+pruneRows : SolveGrid -> SolveGrid
 pruneRows grid =
     let
         rows =
@@ -245,7 +245,7 @@ pruneRows grid =
     List.foldl pruneReducer grid rows
 
 
-pruneCols : Grid -> Grid
+pruneCols : SolveGrid -> SolveGrid
 pruneCols grid =
     let
         cols =
@@ -254,7 +254,7 @@ pruneCols grid =
     List.foldl pruneReducer grid cols
 
 
-pruneBoxes : Grid -> Grid
+pruneBoxes : SolveGrid -> SolveGrid
 pruneBoxes grid =
     let
         boxes =
@@ -263,10 +263,10 @@ pruneBoxes grid =
     List.foldl pruneReducer grid boxes
 
 
-pruneReducer : List Coord -> Grid -> Grid
+pruneReducer : List Coord -> SolveGrid -> SolveGrid
 pruneReducer coords grid =
     let
-        fn : ( Coord, Cell ) -> Grid -> Grid
+        fn : ( Coord, Cell ) -> SolveGrid -> SolveGrid
         fn ( coord, cell ) grid_ =
             setByCoord coord grid_ cell
     in
@@ -300,17 +300,17 @@ pruneCells cells =
     List.map pruneCell cells
 
 
-empty : Grid
+empty : SolveGrid
 empty =
-    Array.fromList (List.repeat 81 Cell.default) |> Grid
+    Array.fromList (List.repeat 81 Cell.default) |> SolveGrid
 
 
 
 -- Puzzle Logic
 
 
-resetPossible : Grid -> Grid
-resetPossible (Grid arr) =
+resetPossible : SolveGrid -> SolveGrid
+resetPossible (SolveGrid arr) =
     arr
         |> Array.map
             (\cell ->
@@ -324,24 +324,24 @@ resetPossible (Grid arr) =
                     Possible _ notes ->
                         Possible Number.setAll notes
             )
-        |> Grid
+        |> SolveGrid
 
 
 
 -- Encode/Decode
 
 
-encode : Grid -> Encode.Value
-encode (Grid grid) =
+encode : SolveGrid -> Encode.Value
+encode (SolveGrid grid) =
     Encode.array Cell.encode grid
 
 
-decoder : Decoder Grid
+decoder : Decoder SolveGrid
 decoder =
-    Decode.map Grid (Decode.array Cell.decoder)
+    Decode.map SolveGrid (Decode.array Cell.decoder)
 
 
-fromJson : Encode.Value -> Maybe Grid
+fromJson : Encode.Value -> Maybe SolveGrid
 fromJson json =
     case Decode.decodeValue decoder json of
         Ok grid ->
@@ -364,7 +364,7 @@ port loadGrid : () -> Cmd msg
 port gridReceiver : (Decode.Value -> msg) -> Sub msg
 
 
-save : Grid -> Cmd msg
+save : SolveGrid -> Cmd msg
 save grid =
     saveGrid (encode grid)
 
@@ -374,7 +374,7 @@ load _ =
     loadGrid ()
 
 
-receiver : (Maybe Grid -> msg) -> Sub msg
+receiver : (Maybe SolveGrid -> msg) -> Sub msg
 receiver fromGrid =
     gridReceiver (\json -> fromJson json |> fromGrid)
 
@@ -441,7 +441,7 @@ coordDecoder =
 -- View Helpers
 
 
-preview : Grid -> Html msg
+preview : SolveGrid -> Html msg
 preview grid =
     let
         rows =
