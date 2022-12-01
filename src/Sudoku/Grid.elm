@@ -6,8 +6,12 @@ module Sudoku.Grid exposing
     , encode
     , encodeCoord
     , getByCoord
+    , getByIndex
     , init
+    , isLegal
+    , isSolvable
     , setByCoord
+    , setByIndex
     , toBoxes
     , toCols
     , toRows
@@ -20,8 +24,11 @@ which use different types for the grid cells.
 -}
 
 import Array exposing (Array)
+import Array.Extra
 import Json.Decode as Json exposing (Decoder)
 import Json.Encode as Encode
+import List.Extra
+import Sudoku.Number exposing (Number)
 
 
 {-| A generic 9x9 grid
@@ -44,6 +51,47 @@ init default =
         }
 
 
+isLegal : (a -> Maybe Number) -> Grid a -> Bool
+isLegal getNumber grid =
+    let
+        checkGroup : List a -> Bool
+        checkGroup group =
+            group
+                |> List.filterMap getNumber
+                |> List.Extra.allDifferent
+
+        ok : (Grid a -> List (List a)) -> Bool
+        ok toGroup =
+            grid
+                |> toGroup
+                |> List.map checkGroup
+                |> List.member False
+                |> not
+    in
+    ok toRows && ok toCols && ok toBoxes
+
+
+isSolvable : (a -> Maybe Number) -> Grid a -> Bool
+isSolvable getNumber (Grid { array }) =
+    let
+        givenNumbers =
+            Array.Extra.filterMap getNumber array
+    in
+    Array.length givenNumbers >= 17
+
+
+
+-- Internal Helpers
+
+
+setArray : Grid a -> Array a -> Grid a
+setArray (Grid { default }) newArray =
+    Grid
+        { array = newArray
+        , default = default
+        }
+
+
 
 -- Get/Set by Coord
 
@@ -59,16 +107,28 @@ setByCoord coord grid newCell =
     let
         (Grid { array }) =
             grid
-
-        setArray : Grid a -> Array a -> Grid a
-        setArray (Grid { default }) newArray =
-            Grid
-                { array = newArray
-                , default = default
-                }
     in
-    array
-        |> Array.set (coordToIndex coord) newCell
+    Array.set (coordToIndex coord) newCell array
+        |> setArray grid
+
+
+
+-- Get/Set by index
+
+
+getByIndex : Int -> Grid a -> a
+getByIndex index (Grid { array, default }) =
+    Array.get index array
+        |> Maybe.withDefault default
+
+
+setByIndex : Int -> Grid a -> a -> Grid a
+setByIndex index grid newCell =
+    let
+        (Grid { array }) =
+            grid
+    in
+    Array.set index newCell array
         |> setArray grid
 
 
