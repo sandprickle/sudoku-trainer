@@ -6,6 +6,7 @@ import Html.Attributes
     exposing
         ( class
         , classList
+        , disabled
         )
 import Html.Events exposing (onClick)
 import Html.Lazy
@@ -69,6 +70,7 @@ init =
 
 type Msg
     = ClickedStart
+    | ClickedClear
     | KeyDown RawKey
 
 
@@ -100,6 +102,14 @@ update _ msg model =
 
         ClickedStart ->
             ( model, Cmd.none )
+
+        ClickedClear ->
+            ( { model
+                | grid = Grid.init Blank
+                , currentIndex = 0
+              }
+            , Cmd.none
+            )
 
 
 processEditAction : Model -> EditAction -> Model
@@ -198,11 +208,8 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     let
-        legal =
-            isLegal model.grid
-
-        currentCoord =
-            Grid.indexToCoord model.currentIndex
+        disableStartButton =
+            not (isLegal model.grid && isSolvable model.grid)
 
         viewRow : Int -> List Cell -> Html Msg
         viewRow y row =
@@ -242,9 +249,17 @@ view model =
                   <|
                     List.indexedMap viewRow (Grid.toRows model.grid)
                 , div
-                    [ class "flex justify-center mt-4" ]
+                    [ class "flex justify-between mt-4" ]
                     [ button
-                        [ class "btn", onClick ClickedStart ]
+                        [ class "btn"
+                        , onClick ClickedClear
+                        ]
+                        [ text "Clear" ]
+                    , button
+                        [ class "btn"
+                        , onClick ClickedStart
+                        , disabled disableStartButton
+                        ]
                         [ text "Start Puzzle" ]
                     ]
                 ]
