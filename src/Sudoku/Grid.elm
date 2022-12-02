@@ -2,11 +2,13 @@ module Sudoku.Grid exposing
     ( Coord
     , Grid
     , coordDecoder
+    , coordToIndex
     , decoder
     , encode
     , encodeCoord
     , getByCoord
     , getByIndex
+    , indexToCoord
     , init
     , isLegal
     , isSolvable
@@ -257,39 +259,44 @@ type alias Coord =
     }
 
 
-normalizeCoord : Coord -> Coord
-normalizeCoord coord =
-    let
-        y =
-            if coord.y > 8 then
-                8
-
-            else if coord.y < 0 then
-                0
-
-            else
-                coord.y
-
-        x =
-            if coord.x > 8 then
-                8
-
-            else if coord.x < 0 then
-                0
-
-            else
-                coord.x
-    in
-    { x = x, y = y }
-
-
 coordToIndex : Coord -> Int
 coordToIndex coord =
     let
-        { x, y } =
-            normalizeCoord coord
+        normalize index =
+            if index > 8 then
+                8
+
+            else if index < 0 then
+                0
+
+            else
+                index
+
+        x =
+            normalize coord.x
+
+        y =
+            normalize coord.y
     in
     (y * 9) + x
+
+
+indexToCoord : Int -> Coord
+indexToCoord index =
+    let
+        normalizedIndex =
+            if index < 0 then
+                0
+
+            else if index > 80 then
+                80
+
+            else
+                index
+    in
+    { x = modBy 9 normalizedIndex
+    , y = normalizedIndex // 9
+    }
 
 
 encodeCoord : Coord -> Json.Value
