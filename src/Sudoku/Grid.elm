@@ -1,17 +1,24 @@
 module Sudoku.Grid exposing
     ( Coord
     , Grid
+    , boxCoords
+    , colCoords
     , coordDecoder
     , coordToIndex
     , decoder
     , encode
     , encodeCoord
+    , getBox
     , getByCoord
     , getByIndex
+    , getCol
+    , getRow
     , indexToCoord
     , init
     , isLegal
     , isSolvable
+    , map
+    , rowCoords
     , setByCoord
     , setByIndex
     , toBoxes
@@ -50,6 +57,14 @@ init default =
     Grid
         { default = default
         , array = Array.repeat 81 default
+        }
+
+
+map : (a -> b) -> Grid a -> Grid b
+map fn (Grid { default, array }) =
+    Grid
+        { default = fn default
+        , array = Array.map fn array
         }
 
 
