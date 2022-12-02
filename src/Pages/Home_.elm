@@ -57,11 +57,10 @@ view model =
                 Nothing ->
                     viewNewPuzzle
 
-                Just grid ->
+                Just _ ->
                     div [ class "grid grid-cols-2 gap-8" ]
                         [ div []
-                            [ SolveGrid.preview grid
-                            , div [ class "text-center" ]
+                            [ div [ class "text-center" ]
                                 [ a
                                     [ class "btn mt-4 inline-block"
                                     , href (Route.toHref Route.Solve)
@@ -78,8 +77,7 @@ view model =
 viewNewPuzzle : Html Msg
 viewNewPuzzle =
     div []
-        [ SolveGrid.preview SolveGrid.empty
-        , div [ class "text-center" ]
+        [ div [ class "text-center" ]
             [ a
                 [ class "btn mt-4 inline-block"
                 , href (Route.toHref Route.New)
