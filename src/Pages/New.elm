@@ -1,7 +1,7 @@
 module Pages.New exposing (Model, Msg, page)
 
 import Gen.Params.New exposing (Params)
-import Html exposing (button, div, h2, table, td, text, tr)
+import Html exposing (Html, button, div, h2, table, td, text, tr)
 import Html.Attributes
     exposing
         ( class
@@ -106,13 +106,21 @@ processEditAction : Model -> EditAction -> Model
 processEditAction model action =
     case action of
         Append cell ->
-            { model
-                | grid =
+            let
+                newGrid =
                     Grid.setByIndex
                         model.currentIndex
                         model.grid
                         cell
-                , currentIndex = model.currentIndex + 1
+            in
+            { model
+                | grid = newGrid
+                , currentIndex =
+                    if isLegal newGrid && model.currentIndex <= 80 then
+                        model.currentIndex + 1
+
+                    else
+                        model.currentIndex
             }
 
         Delete ->
@@ -122,7 +130,12 @@ processEditAction model action =
                         model.currentIndex
                         model.grid
                         Blank
-                , currentIndex = model.currentIndex - 1
+                , currentIndex =
+                    if model.currentIndex > 0 then
+                        model.currentIndex - 1
+
+                    else
+                        model.currentIndex
             }
 
 
@@ -188,19 +201,33 @@ view model =
         legal =
             isLegal model.grid
 
-        viewCell cell =
-            td [ class "border border-zinc-700" ]
-                [ div
-                    [ class " h-14 w-14 flex justify-center items-center text-3xl"
-                    , classList [ ( "problem", not legal ) ]
-                    ]
-                    [ text (cellToString cell) ]
-                ]
+        currentCoord =
+            Grid.indexToCoord model.currentIndex
 
-        viewRow row =
+        viewRow : Int -> List Cell -> Html Msg
+        viewRow y row =
             tr [] <|
-                List.map
-                    (Html.Lazy.lazy viewCell)
+                List.indexedMap
+                    (\x cell ->
+                        let
+                            selected =
+                                Grid.indexToCoord model.currentIndex == { x = x, y = y }
+
+                            problem =
+                                selected && not (isLegal model.grid)
+
+                            options =
+                                if selected && problem then
+                                    SelectedProblem
+
+                                else if selected then
+                                    SelectedOk
+
+                                else
+                                    Normal
+                        in
+                        Html.Lazy.lazy2 viewCell options cell
+                    )
                     row
     in
     { title = "New Puzzle | Sudoku Trainer"
@@ -213,7 +240,7 @@ view model =
                 , table
                     [ class "puzzle border-2 border-zinc-500 my-8" ]
                   <|
-                    List.map viewRow (Grid.toRows model.grid)
+                    List.indexedMap viewRow (Grid.toRows model.grid)
                 , div
                     [ class "flex justify-center mt-4" ]
                     [ button
@@ -223,6 +250,35 @@ view model =
                 ]
             ]
     }
+
+
+type ViewCellOptions
+    = Normal
+    | SelectedOk
+    | SelectedProblem
+
+
+viewCell : ViewCellOptions -> Cell -> Html Msg
+viewCell options cell =
+    let
+        { selected, problem } =
+            case options of
+                Normal ->
+                    { selected = False, problem = False }
+
+                SelectedOk ->
+                    { selected = True, problem = False }
+
+                SelectedProblem ->
+                    { selected = True, problem = True }
+    in
+    td [ class "border border-zinc-700" ]
+        [ div
+            [ class " h-14 w-14 flex justify-center items-center text-3xl"
+            , classList [ ( "problem", problem ), ( "selected", selected ) ]
+            ]
+            [ text (cellToString cell) ]
+        ]
 
 
 getNumber : Cell -> Maybe Number
