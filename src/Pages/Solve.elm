@@ -332,7 +332,7 @@ view model =
                 [ class "border border-zinc-700 " ]
                 [ div
                     [ class
-                        "h-14 w-14 flex justify-center items-center text-3xl"
+                        "h-16 w-16 flex justify-center items-center text-3xl"
                     , classList
                         [ ( "selected", selected )
                         , ( "problem", problem )
