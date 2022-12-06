@@ -1,6 +1,7 @@
 module Pages.New exposing (Model, Msg, page)
 
 import Gen.Params.New exposing (Params)
+import Gen.Route as Route
 import Html exposing (Html, button, div, h2, table, td, text, tr)
 import Html.Attributes
     exposing
@@ -16,6 +17,8 @@ import Request
 import Shared
 import Sudoku.Grid as Grid exposing (Grid)
 import Sudoku.Number as Number exposing (Number)
+import Sudoku.Solve.Cell
+import Sudoku.Solve.Grid
 import UI
 import View exposing (View)
 
@@ -80,7 +83,7 @@ type EditAction
 
 
 update : Request.With Params -> Msg -> Model -> ( Model, Cmd Msg )
-update _ msg model =
+update req msg model =
     case msg of
         KeyDown rawKey ->
             let
@@ -101,7 +104,17 @@ update _ msg model =
                     ( model, Cmd.none )
 
         ClickedStart ->
-            ( model, Cmd.none )
+            if isSolvable model.grid && isLegal model.grid then
+                ( model
+                , Cmd.batch
+                    [ Sudoku.Solve.Grid.save <|
+                        Grid.map cellToSolveCell model.grid
+                    , Request.pushRoute Route.Solve req
+                    ]
+                )
+
+            else
+                ( model, Cmd.none )
 
         ClickedClear ->
             ( { model
@@ -304,6 +317,16 @@ getNumber cell =
 
         Blank ->
             Nothing
+
+
+cellToSolveCell : Cell -> Sudoku.Solve.Cell.Cell
+cellToSolveCell cell =
+    case cell of
+        Number number ->
+            Sudoku.Solve.Cell.Given number
+
+        Blank ->
+            Sudoku.Solve.Cell.default
 
 
 isLegal : Grid Cell -> Bool
