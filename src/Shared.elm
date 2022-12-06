@@ -9,7 +9,7 @@ module Shared exposing
 
 import Json.Decode as Json
 import Request exposing (Request)
-import Sudoku.SolveGrid as SolveGrid exposing (SolveGrid)
+import Sudoku.Solve.Grid as Grid exposing (Grid)
 
 
 type alias Flags =
@@ -17,16 +17,16 @@ type alias Flags =
 
 
 type alias Model =
-    { currentPuzzle : Maybe SolveGrid }
+    { currentPuzzle : Maybe Grid }
 
 
 type Msg
-    = UpdatedPuzzle (Maybe SolveGrid)
+    = UpdatedPuzzle (Maybe Grid)
 
 
 init : Request -> Flags -> ( Model, Cmd Msg )
 init _ flags =
-    ( { currentPuzzle = SolveGrid.fromJson flags }, Cmd.none )
+    ( { currentPuzzle = Grid.fromJson flags }, Cmd.none )
 
 
 update : Request -> Msg -> Model -> ( Model, Cmd Msg )
@@ -38,4 +38,4 @@ update _ msg model =
 
 subscriptions : Request -> Model -> Sub Msg
 subscriptions _ _ =
-    SolveGrid.receiver UpdatedPuzzle
+    Grid.receiver UpdatedPuzzle

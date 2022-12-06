@@ -1,8 +1,8 @@
 module Sudoku.CellTests exposing (..)
 
 import Expect
-import Sudoku.Cell as Cell
 import Sudoku.Number as Number
+import Sudoku.Solve.Cell as Cell
 import Test exposing (..)
 
 

@@ -1,6 +1,6 @@
-port module Sudoku.SolveGrid exposing
+port module Sudoku.Solve.Grid exposing
     ( Coord
-    , SolveGrid
+    , Grid
     , coordDecoder
     , decoder
     , empty
@@ -23,26 +23,22 @@ port module Sudoku.SolveGrid exposing
     , toRows
     )
 
-import Array exposing (Array)
-import Html exposing (Html)
-import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import List.Extra
-import Sudoku.Cell as Cell exposing (Cell(..))
-import Sudoku.Grid as Grid exposing (Grid)
+import Sudoku.Grid as Grid
 import Sudoku.Number as Number exposing (NumSet)
+import Sudoku.Solve.Cell as Cell exposing (Cell(..))
 
 
-type alias SolveGrid =
-    Grid Cell
+type alias Grid =
+    Grid.Grid Cell
 
 
 
 -- Validity Checks
 
 
-solvable : SolveGrid -> Maybe SolveGrid
+solvable : Grid -> Maybe Grid
 solvable grid =
     if isSolvable grid then
         Just grid
@@ -51,12 +47,12 @@ solvable grid =
         Nothing
 
 
-isSolvable : SolveGrid -> Bool
+isSolvable : Grid -> Bool
 isSolvable grid =
     Grid.isSolvable Cell.getNumber grid
 
 
-legal : SolveGrid -> Maybe SolveGrid
+legal : Grid -> Maybe Grid
 legal grid =
     if isLegal grid then
         Just grid
@@ -65,7 +61,7 @@ legal grid =
         Nothing
 
 
-isLegal : SolveGrid -> Bool
+isLegal : Grid -> Bool
 isLegal grid =
     Grid.isLegal Cell.getNumber grid
 
@@ -74,12 +70,12 @@ isLegal grid =
 -- Get/set by Coord
 
 
-getByCoord : Coord -> SolveGrid -> Cell
+getByCoord : Coord -> Grid -> Cell
 getByCoord =
     Grid.getByCoord
 
 
-setByCoord : Coord -> SolveGrid -> Cell -> SolveGrid
+setByCoord : Coord -> Grid -> Cell -> Grid
 setByCoord =
     Grid.setByCoord
 
@@ -88,17 +84,17 @@ setByCoord =
 -- Convert to List of Rows, Cols, or Boxes
 
 
-toRows : SolveGrid -> List (List Cell)
+toRows : Grid -> List (List Cell)
 toRows =
     Grid.toRows
 
 
-toCols : SolveGrid -> List (List Cell)
+toCols : Grid -> List (List Cell)
 toCols =
     Grid.toCols
 
 
-toBoxes : SolveGrid -> List (List Cell)
+toBoxes : Grid -> List (List Cell)
 toBoxes =
     Grid.toBoxes
 
@@ -126,7 +122,7 @@ boxCoords =
 -- Possible Value Pruning
 
 
-pruneAll : SolveGrid -> SolveGrid
+pruneAll : Grid -> Grid
 pruneAll grid =
     let
         newGrid =
@@ -142,7 +138,7 @@ pruneAll grid =
         pruneAll newGrid
 
 
-pruneRows : SolveGrid -> SolveGrid
+pruneRows : Grid -> Grid
 pruneRows grid =
     let
         rows =
@@ -151,7 +147,7 @@ pruneRows grid =
     List.foldl pruneReducer grid rows
 
 
-pruneCols : SolveGrid -> SolveGrid
+pruneCols : Grid -> Grid
 pruneCols grid =
     let
         cols =
@@ -160,7 +156,7 @@ pruneCols grid =
     List.foldl pruneReducer grid cols
 
 
-pruneBoxes : SolveGrid -> SolveGrid
+pruneBoxes : Grid -> Grid
 pruneBoxes grid =
     let
         boxes =
@@ -169,10 +165,10 @@ pruneBoxes grid =
     List.foldl pruneReducer grid boxes
 
 
-pruneReducer : List Coord -> SolveGrid -> SolveGrid
+pruneReducer : List Coord -> Grid -> Grid
 pruneReducer coords grid =
     let
-        fn : ( Coord, Cell ) -> SolveGrid -> SolveGrid
+        fn : ( Coord, Cell ) -> Grid -> Grid
         fn ( coord, cell ) grid_ =
             setByCoord coord grid_ cell
     in
@@ -206,7 +202,7 @@ pruneCells cells =
     List.map pruneCell cells
 
 
-empty : SolveGrid
+empty : Grid
 empty =
     Grid.init Cell.default
 
@@ -215,7 +211,7 @@ empty =
 -- Puzzle Logic
 
 
-resetPossible : SolveGrid -> SolveGrid
+resetPossible : Grid -> Grid
 resetPossible grid =
     grid
         |> Grid.map
@@ -236,17 +232,17 @@ resetPossible grid =
 -- Encode/Decode
 
 
-encode : SolveGrid -> Encode.Value
+encode : Grid -> Encode.Value
 encode =
     Grid.encode Cell.encode
 
 
-decoder : Decoder SolveGrid
+decoder : Decoder Grid
 decoder =
     Grid.decoder Cell.decoder
 
 
-fromJson : Encode.Value -> Maybe SolveGrid
+fromJson : Encode.Value -> Maybe Grid
 fromJson json =
     case Decode.decodeValue decoder json of
         Ok grid ->
@@ -269,7 +265,7 @@ port loadGrid : () -> Cmd msg
 port gridReceiver : (Decode.Value -> msg) -> Sub msg
 
 
-save : SolveGrid -> Cmd msg
+save : Grid -> Cmd msg
 save grid =
     saveGrid (encode grid)
 
@@ -279,7 +275,7 @@ load _ =
     loadGrid ()
 
 
-receiver : (Maybe SolveGrid -> msg) -> Sub msg
+receiver : (Maybe Grid -> msg) -> Sub msg
 receiver fromGrid =
     gridReceiver (\json -> fromJson json |> fromGrid)
 
