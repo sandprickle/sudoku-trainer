@@ -2,7 +2,7 @@ module Pages.Solve exposing (Model, Msg, page)
 
 import Gen.Params.Solve exposing (Params)
 import Gen.Route as Route
-import Html exposing (Html, table, td, text, tr)
+import Html exposing (Html, div, table, td, text, tr)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Lazy exposing (lazy2)
@@ -329,15 +329,19 @@ view model =
                             False
             in
             td
-                [ class UI.theme.cell
-                , classList
-                    [ ( "selected", selected )
-                    , ( "problem", problem )
-                    , ( "given", given )
+                [ class "border border-zinc-700 " ]
+                [ div
+                    [ class
+                        "h-14 w-14 flex justify-center items-center text-3xl"
+                    , classList
+                        [ ( "selected", selected )
+                        , ( "problem", problem )
+                        , ( "given", given )
+                        ]
+                    , onClick <| ClickedCell coord
                     ]
-                , onClick <| ClickedCell coord
+                    [ text (Cell.numberToString cell) ]
                 ]
-                [ text (Cell.numberToString cell) ]
 
         viewRow : Int -> List Cell -> Html Msg
         viewRow y row =
@@ -365,7 +369,7 @@ view model =
     { title = "Solve"
     , body =
         UI.layout
-            [ table [ class ("puzzle " ++ UI.theme.puzzleBorder) ]
+            [ table [ class "puzzle border-2 border-zinc-500" ]
                 (List.indexedMap viewRow (Grid.toRows model.puzzle))
             ]
     }
