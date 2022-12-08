@@ -224,7 +224,7 @@ resetPossible grid =
                         cell
 
                     Possible _ notes ->
-                        Possible Number.setAll notes
+                        Possible Number.fullSet notes
             )
 
 

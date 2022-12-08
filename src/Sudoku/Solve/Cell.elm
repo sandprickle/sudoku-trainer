@@ -32,7 +32,9 @@ initFromChar char =
             Given number
 
         Nothing ->
-            Possible Number.setAll { primary = [], secondary = [] }
+            Possible
+                Number.fullSet
+                { primary = Number.emptySet, secondary = Number.emptySet }
 
 
 numberToString : Cell -> String
@@ -133,7 +135,11 @@ when creating a new grid
 -}
 default : Cell
 default =
-    Possible Number.setAll { primary = [], secondary = [] }
+    Possible
+        Number.fullSet
+        { primary = Number.emptySet
+        , secondary = Number.emptySet
+        }
 
 
 
@@ -208,21 +214,21 @@ decodePossible =
 
 
 type alias Notes =
-    { primary : List Number
-    , secondary : List Number
+    { primary : NumSet
+    , secondary : NumSet
     }
 
 
 encodeNotes : Notes -> Encode.Value
 encodeNotes notes =
     Encode.object
-        [ ( "primary", Encode.list Number.encode notes.primary )
-        , ( "secondary", Encode.list Number.encode notes.secondary )
+        [ ( "primary", Number.encodeSet notes.primary )
+        , ( "secondary", Number.encodeSet notes.secondary )
         ]
 
 
 notesDecoder : Decoder Notes
 notesDecoder =
     Decode.map2 Notes
-        (Decode.field "primary" (Decode.list Number.decoder))
-        (Decode.field "secondary" (Decode.list Number.decoder))
+        (Decode.field "primary" Number.setDecoder)
+        (Decode.field "secondary" Number.setDecoder)

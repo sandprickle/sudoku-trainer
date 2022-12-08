@@ -4,15 +4,16 @@ module Sudoku.Number exposing
     , all
     , decoder
     , eight
+    , emptySet
     , encode
     , encodeSet
     , five
     , four
     , fromChar
     , fromString
+    , fullSet
     , nine
     , one
-    , setAll
     , setDecoder
     , setDiff
     , setFromList
@@ -129,9 +130,14 @@ type NumSet
 
 {-| A set of all Numbers
 -}
-setAll : NumSet
-setAll =
+fullSet : NumSet
+fullSet =
     List.range 1 9 |> Set.fromList |> NumSet
+
+
+emptySet : NumSet
+emptySet =
+    [] |> Set.fromList |> NumSet
 
 
 setInsert : Number -> NumSet -> NumSet

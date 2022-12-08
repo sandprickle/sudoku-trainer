@@ -29,14 +29,18 @@ suite =
                             |> Cell.initFromChar
                             |> Cell.getNotes
                             |> Expect.equal
-                                (Just { primary = [], secondary = [] })
+                                (Just
+                                    { primary = Number.emptySet
+                                    , secondary = Number.emptySet
+                                    }
+                                )
                 , test "Possibilities include all numbers" <|
                     \_ ->
                         '.'
                             |> Cell.initFromChar
                             |> Cell.getPossible
                             |> Expect.equal
-                                (Just Number.setAll)
+                                (Just Number.fullSet)
                 ]
             ]
         ]
