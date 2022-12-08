@@ -11,7 +11,7 @@ import Page
 import Request
 import Set
 import Shared
-import Sudoku.Number as Number exposing (Number)
+import Sudoku.Number as Number exposing (NumSet, Number)
 import Sudoku.Solve.Cell as Cell exposing (Cell(..))
 import Sudoku.Solve.Grid as Grid exposing (Coord, Grid)
 import UI
@@ -36,6 +36,7 @@ type alias Model =
     { puzzle : Grid
     , selectedCell : Maybe Coord
     , problemCell : Maybe Coord
+    , insertMode : InsertMode
     }
 
 
@@ -46,6 +47,7 @@ init req puzzle =
             ( { puzzle = Grid.empty
               , selectedCell = Nothing
               , problemCell = Nothing
+              , insertMode = Number
               }
             , Request.pushRoute Route.Home_ req
             )
@@ -54,6 +56,7 @@ init req puzzle =
             ( { puzzle = grid
               , selectedCell = Nothing
               , problemCell = Nothing
+              , insertMode = Number
               }
             , Cmd.none
             )
@@ -66,6 +69,7 @@ init req puzzle =
 type Msg
     = ClickedCell Coord
     | KeyDown RawKey
+    | ClickedChangeMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -83,6 +87,9 @@ update msg model =
         ClickedCell coord ->
             ( { model | selectedCell = Just coord }, saveCmd )
 
+        ClickedChangeMode ->
+            ( changeMode model, Cmd.none )
+
         KeyDown rawKey ->
             let
                 keyStr =
@@ -93,10 +100,16 @@ update msg model =
                         _ ->
                             ""
             in
-            case parseAction keyStr of
+            case parseKeyboardAction keyStr of
                 InsertNumber num ->
                     if model.problemCell == Nothing then
-                        case insertNumber num model.selectedCell model.puzzle of
+                        case
+                            insertNumber
+                                num
+                                model.selectedCell
+                                model.insertMode
+                                model.puzzle
+                        of
                             Ok puzzle ->
                                 ( { model | puzzle = puzzle }
                                 , saveCmd
@@ -137,19 +150,23 @@ update msg model =
                     , saveCmd
                     )
 
+                ChangeMode ->
+                    ( changeMode model, Cmd.none )
+
                 None ->
                     ( model, saveCmd )
 
 
-type Action
+type KeyboardAction
     = InsertNumber Number
     | ClearNumber
     | UpdateSelection SelectionAction
+    | ChangeMode
     | None
 
 
-parseAction : String -> Action
-parseAction str =
+parseKeyboardAction : String -> KeyboardAction
+parseKeyboardAction str =
     let
         valueKeys =
             Set.fromList [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
@@ -176,38 +193,95 @@ parseAction str =
             "l" ->
                 UpdateSelection MoveRight
 
+            "m" ->
+                ChangeMode
+
+            "i" ->
+                ChangeMode
+
             _ ->
                 None
 
 
-insertNumber : Number -> Maybe Coord -> Grid -> Result ( Grid, Coord ) Grid
-insertNumber num selectedCell grid =
+type InsertMode
+    = Number
+    | PrimaryNotes
+    | SecondaryNotes
+
+
+changeMode : { a | insertMode : InsertMode } -> { a | insertMode : InsertMode }
+changeMode model =
+    { model
+        | insertMode =
+            case model.insertMode of
+                Number ->
+                    PrimaryNotes
+
+                PrimaryNotes ->
+                    SecondaryNotes
+
+                SecondaryNotes ->
+                    Number
+    }
+
+
+insertNumber :
+    Number
+    -> Maybe Coord
+    -> InsertMode
+    -> Grid
+    -> Result ( Grid, Coord ) Grid
+insertNumber newNumber selectedCell mode grid =
     case selectedCell of
+        Nothing ->
+            Ok grid
+
         Just coord ->
-            let
-                cell =
-                    Grid.getByCoord coord grid
-            in
-            case cell of
+            case Grid.getByCoord coord grid of
                 Given _ ->
                     Ok grid
 
                 Fixed _ _ ->
                     Ok grid
 
-                Possible _ notes ->
-                    let
-                        newGrid =
-                            Grid.setByCoord coord grid (Fixed num notes)
-                    in
-                    if Grid.isLegal newGrid then
-                        Ok (Grid.pruneAll newGrid)
+                Possible possible notes ->
+                    case mode of
+                        Number ->
+                            let
+                                newGrid =
+                                    Grid.setByCoord coord grid <|
+                                        Fixed newNumber notes
+                            in
+                            if Grid.isLegal newGrid then
+                                Ok (Grid.pruneAll newGrid)
 
-                    else
-                        Err ( newGrid, coord )
+                            else
+                                Err ( newGrid, coord )
 
-        Nothing ->
-            Ok grid
+                        PrimaryNotes ->
+                            Ok <|
+                                Grid.setByCoord coord grid <|
+                                    Possible possible
+                                        { primary = toggleNote newNumber notes.primary
+                                        , secondary = notes.secondary
+                                        }
+
+                        SecondaryNotes ->
+                            Ok <|
+                                Grid.setByCoord coord grid <|
+                                    Possible possible
+                                        { primary = notes.primary
+                                        , secondary = toggleNote newNumber notes.secondary
+                                        }
+
+
+toggleNote : Number -> NumSet -> NumSet
+toggleNote number notes =
+    if Number.setMember number notes then
+        Number.setRemove number notes
+
+    else
+        Number.setInsert number notes
 
 
 clearNumber : Maybe Coord -> Grid -> Grid
@@ -226,7 +300,7 @@ clearNumber selectedCell grid =
                     grid
 
                 Fixed _ notes ->
-                    Possible Number.setAll notes
+                    Possible Number.fullSet notes
                         |> Grid.setByCoord coord grid
                         |> Grid.resetPossible
                         |> Grid.pruneAll
@@ -308,41 +382,6 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     let
-        viewCell :
-            { coord : Coord
-            , selected : Bool
-            , problem : Bool
-            }
-            -> Cell
-            -> Html Msg
-        viewCell { coord, selected, problem } cell =
-            let
-                given =
-                    case cell of
-                        Given _ ->
-                            True
-
-                        Fixed _ _ ->
-                            False
-
-                        Possible _ _ ->
-                            False
-            in
-            td
-                [ class "border border-zinc-700 " ]
-                [ div
-                    [ class
-                        "h-16 w-16 flex justify-center items-center text-3xl"
-                    , classList
-                        [ ( "selected", selected )
-                        , ( "problem", problem )
-                        , ( "given", given )
-                        ]
-                    , onClick <| ClickedCell coord
-                    ]
-                    [ text (Cell.numberToString cell) ]
-                ]
-
         viewRow : Int -> List Cell -> Html Msg
         viewRow y row =
             row
@@ -369,7 +408,107 @@ view model =
     { title = "Solve"
     , body =
         UI.layout
-            [ table [ class "puzzle border-2 border-zinc-500" ]
+            [ div
+                [ class "p-4 h-full" ]
+                [ Html.p
+                    []
+                    [ text "Input Mode" ]
+                , Html.button
+                    [ class "rounded border border-gray-700 flex justify-evenly items-center block"
+                    , onClick ClickedChangeMode
+                    ]
+                    ([ { contents = text "Number"
+                       , selected = model.insertMode == Number
+                       }
+                     , { contents = text "Primary Notes"
+                       , selected = model.insertMode == PrimaryNotes
+                       }
+                     , { contents = text "Secondary Notes"
+                       , selected = model.insertMode == SecondaryNotes
+                       }
+                     ]
+                        |> List.map
+                            (\{ contents, selected } ->
+                                Html.p
+                                    [ class "p-2 border-r border-gray-700"
+                                    , classList [ ( "bg-primary", selected ) ]
+                                    ]
+                                    [ contents ]
+                            )
+                    )
+                ]
+            , table
+                [ class "puzzle border-2 border-zinc-500" ]
                 (List.indexedMap viewRow (Grid.toRows model.puzzle))
             ]
     }
+
+
+viewCell :
+    { coord : Coord
+    , selected : Bool
+    , problem : Bool
+    }
+    -> Cell
+    -> Html Msg
+viewCell { coord, selected, problem } cell =
+    let
+        given =
+            case cell of
+                Given _ ->
+                    True
+
+                Fixed _ _ ->
+                    False
+
+                Possible _ _ ->
+                    False
+    in
+    td
+        [ class "border border-zinc-700 h-16 w-16" ]
+        [ div
+            [ class
+                "h-full w-full flex justify-center items-center text-3xl"
+            , classList
+                [ ( "selected", selected )
+                , ( "problem", problem )
+                , ( "given", given )
+                ]
+            , onClick <| ClickedCell coord
+            ]
+            [ case cell of
+                Given _ ->
+                    text (Cell.numberToString cell)
+
+                Fixed _ _ ->
+                    text (Cell.numberToString cell)
+
+                Possible _ notes ->
+                    viewNotes notes
+            ]
+        ]
+
+
+viewNotes : Cell.Notes -> Html Msg
+viewNotes { primary, secondary } =
+    div
+        [ class "h-full w-full text-gray-500 grid grid-cols-3 grid-rows-3 text-sm" ]
+        (Number.setToList Number.fullSet
+            |> List.map
+                (\number ->
+                    if Number.setMember number primary then
+                        div
+                            [ class
+                                "text-cyan-300 font-bold  flex items-center justify-center"
+                            ]
+                            [ text (Number.toString number) ]
+
+                    else if Number.setMember number secondary then
+                        div
+                            [ class "flex items-center justify-center" ]
+                            [ text (Number.toString number) ]
+
+                    else
+                        div [] []
+                )
+        )

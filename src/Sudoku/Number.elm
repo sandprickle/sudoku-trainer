@@ -20,6 +20,7 @@ module Sudoku.Number exposing
     , setInsert
     , setMember
     , setRemove
+    , setToList
     , seven
     , six
     , three
@@ -38,11 +39,6 @@ type Number
 
 
 -- Primitive Conversions
-
-
-toString : Number -> String
-toString (Number int) =
-    String.fromInt int
 
 
 fromChar : Char -> Maybe Number
@@ -77,6 +73,11 @@ fromChar char =
 
         _ ->
             Nothing
+
+
+toString : Number -> String
+toString (Number int) =
+    String.fromInt int
 
 
 fromString : String -> Maybe Number
@@ -116,6 +117,40 @@ fromString str =
 toInt : Number -> Int
 toInt (Number int) =
     int
+
+
+fromInt : Int -> Maybe Number
+fromInt int =
+    case int of
+        1 ->
+            Just (Number 1)
+
+        2 ->
+            Just (Number 2)
+
+        3 ->
+            Just (Number 3)
+
+        4 ->
+            Just (Number 4)
+
+        5 ->
+            Just (Number 5)
+
+        6 ->
+            Just (Number 6)
+
+        7 ->
+            Just (Number 7)
+
+        8 ->
+            Just (Number 8)
+
+        9 ->
+            Just (Number 9)
+
+        _ ->
+            Nothing
 
 
 
@@ -169,6 +204,14 @@ setFromList list =
 setMember : Number -> NumSet -> Bool
 setMember (Number num) (NumSet set) =
     Set.member num set
+
+
+setToList : NumSet -> List Number
+setToList (NumSet set) =
+    set
+        |> Set.toList
+        |> List.map
+            (\int -> fromInt int |> Maybe.withDefault one)
 
 
 encodeSet : NumSet -> Encode.Value
