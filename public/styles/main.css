@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+    body {
+        @apply bg-zinc-900 text-zinc-300 h-screen w-screen;
+      }
+
+      .btn {
+        @apply bg-primary font-bold text-zinc-300 hover:bg-rose-600 hover:text-zinc-200 px-4 py-2 rounded-full;
+      }
+
+      .btn:disabled {
+        @apply bg-zinc-800 text-zinc-400;
+      }
+
+      /* Puzzle Preview */
+      .puzzle-preview {
+        @apply border-2 border-zinc-500;
+      }
+      .puzzle-preview td {
+        @apply h-8 w-8 text-sm border border-zinc-700;
+      }
+      .puzzle-preview td > div {
+        @apply flex justify-center items-center;
+      }
+      .puzzle-preview tr:nth-of-type(3n) {
+        @apply border-b-2 border-b-zinc-500;
+      }
+      .puzzle-preview td:nth-of-type(3n) {
+        @apply border-r-2 border-r-zinc-500;
+      }
+
+      /* Puzzle */
+      .puzzle tr:nth-of-type(3n) {
+        @apply border-b-2 border-b-zinc-500;
+      }
+      .puzzle td:nth-of-type(3n) {
+        @apply border-r-2 border-r-zinc-500;
+      }
+      .puzzle td {
+        @apply text-rose-300;
+      }
+      .puzzle td .selected {
+        @apply border-2 border-primary bg-zinc-800;
+      }
+      .puzzle td .problem {
+        @apply bg-red-900;
+      }
+      .puzzle td .given {
+        @apply text-zinc-300;
+      }
