@@ -409,7 +409,7 @@ view model =
     , body =
         UI.layout
             [ div
-                [ class "p-4 h-full" ]
+                [ class "my-4" ]
                 [ Html.p
                     []
                     [ text "Input Mode" ]
