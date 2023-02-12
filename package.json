@@ -6,7 +6,8 @@
   "scripts": {
     "postinstall": "elm-tooling install",
     "dev": "concurrently \"elm-spa server\" \"npm run tw-gen -- --watch\"",
-    "tw-gen": "tailwindcss -i ./public/styles/main.css -o ./public/dist/tw.css"
+    "tw-gen": "tailwindcss -i ./public/styles/main.css -o ./public/dist/tw.css",
+    "build": "npm run tw-gen && elm-spa build"
   },
   "keywords": [],
   "author": "",
