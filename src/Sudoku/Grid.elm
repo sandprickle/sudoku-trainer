@@ -21,8 +21,10 @@ module Sudoku.Grid exposing
     , rowCoords
     , setByCoord
     , setByIndex
+    , toArray
     , toBoxes
     , toCols
+    , toList
     , toRows
     )
 
@@ -231,6 +233,20 @@ boxCoords boxNum =
             List.map (getCoord yCoord) xCoords
     in
     List.map coordsInRow yCoords |> List.concat
+
+
+
+-- Convert to list of cells
+
+
+toArray : Grid a -> Array a
+toArray (Grid { array }) =
+    array
+
+
+toList : Grid a -> List a
+toList grid =
+    toArray grid |> Array.toList
 
 
 
