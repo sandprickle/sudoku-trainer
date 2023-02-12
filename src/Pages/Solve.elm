@@ -11,6 +11,7 @@ import Page
 import Request
 import Set
 import Shared
+import Sudoku.Grid
 import Sudoku.Number as Number exposing (NumSet, Number)
 import Sudoku.Solve.Cell as Cell exposing (Cell(..))
 import Sudoku.Solve.Grid as Grid exposing (Coord, Grid)
@@ -37,29 +38,29 @@ type alias Model =
     , selectedCell : Maybe Coord
     , problemCell : Maybe Coord
     , insertMode : InsertMode
+    , hintMessage : String
     }
 
 
 init : Request.With Params -> Maybe Grid -> ( Model, Cmd Msg )
-init req puzzle =
-    case puzzle of
-        Nothing ->
-            ( { puzzle = Grid.empty
-              , selectedCell = Nothing
-              , problemCell = Nothing
-              , insertMode = Number
-              }
-            , Request.pushRoute Route.Home_ req
-            )
+init req savedPuzzle =
+    let
+        ( puzzle, cmd ) =
+            case savedPuzzle of
+                Nothing ->
+                    ( Grid.empty, Request.pushRoute Route.Home_ req )
 
-        Just grid ->
-            ( { puzzle = grid
-              , selectedCell = Nothing
-              , problemCell = Nothing
-              , insertMode = Number
-              }
-            , Cmd.none
-            )
+                Just grid ->
+                    ( grid, Cmd.none )
+    in
+    ( { puzzle = puzzle
+      , hintMessage = "_"
+      , insertMode = Number
+      , selectedCell = Nothing
+      , problemCell = Nothing
+      }
+    , cmd
+    )
 
 
 
@@ -70,6 +71,7 @@ type Msg
     = ClickedCell Coord
     | KeyDown RawKey
     | ClickedChangeMode
+    | RequestedHint Hint
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -89,6 +91,13 @@ update msg model =
 
         ClickedChangeMode ->
             ( changeMode model, Cmd.none )
+
+        RequestedHint hint ->
+            ( { model
+                | hintMessage = generateHint hint model.puzzle
+              }
+            , Cmd.none
+            )
 
         KeyDown rawKey ->
             let
@@ -367,6 +376,55 @@ updateSelection action selectedCell =
 
 
 
+-- Hint Type
+
+
+type Hint
+    = NakedSingle
+    | NakedPair
+    | HiddenPair
+    | NotImplemented
+
+
+generateHint : Hint -> Grid -> String
+generateHint hint puzzle =
+    case hint of
+        NotImplemented ->
+            "Hint not Implemented yet"
+
+        NakedSingle ->
+            let
+                qty =
+                    puzzle
+                        |> Sudoku.Grid.map
+                            (\cell ->
+                                case cell of
+                                    Cell.Fixed _ _ ->
+                                        0
+
+                                    Cell.Given _ ->
+                                        0
+
+                                    Cell.Possible numbers _ ->
+                                        numbers
+                                            |> Number.setToList
+                                            |> List.length
+                            )
+                        |> Sudoku.Grid.toList
+                        |> List.filter (\x -> x == 1)
+                        |> List.length
+            in
+            if qty >= 1 then
+                "Found " ++ String.fromInt qty ++ " naked single"
+
+            else
+                "No naked singles"
+
+        _ ->
+            "No hints for you!"
+
+
+
 -- SUBSCRIPTIONS
 
 
@@ -408,40 +466,98 @@ view model =
     { title = "Solve"
     , body =
         UI.layout
-            [ div
-                [ class "my-4" ]
-                [ Html.p
-                    []
-                    [ text "Input Mode" ]
-                , Html.button
-                    [ class "rounded border border-gray-700 flex justify-evenly items-center block"
-                    , onClick ClickedChangeMode
-                    ]
-                    ([ { contents = text "Number"
-                       , selected = model.insertMode == Number
-                       }
-                     , { contents = text "Primary Notes"
-                       , selected = model.insertMode == PrimaryNotes
-                       }
-                     , { contents = text "Secondary Notes"
-                       , selected = model.insertMode == SecondaryNotes
-                       }
-                     ]
-                        |> List.map
-                            (\{ contents, selected } ->
-                                Html.p
-                                    [ class "p-2 border-r border-gray-700"
-                                    , classList [ ( "bg-primary", selected ) ]
-                                    ]
-                                    [ contents ]
+            [ div [ class "grid grid-cols-2" ]
+                [ -- Solve Grid
+                  div []
+                    [ div
+                        [ class "my-4" ]
+                        [ Html.p
+                            []
+                            [ text "Input Mode" ]
+                        , Html.button
+                            [ class "rounded border border-gray-700 flex justify-evenly items-center block"
+                            , onClick ClickedChangeMode
+                            ]
+                            ([ { contents = text "Number"
+                               , selected = model.insertMode == Number
+                               }
+                             , { contents = text "Primary Notes"
+                               , selected = model.insertMode == PrimaryNotes
+                               }
+                             , { contents = text "Secondary Notes"
+                               , selected = model.insertMode == SecondaryNotes
+                               }
+                             ]
+                                |> List.map
+                                    (\{ contents, selected } ->
+                                        Html.p
+                                            [ class "p-2 border-r border-gray-700"
+                                            , classList [ ( "bg-primary", selected ) ]
+                                            ]
+                                            [ contents ]
+                                    )
                             )
-                    )
+                        ]
+                    , table
+                        [ class "puzzle border-2 border-zinc-500" ]
+                        (List.indexedMap viewRow (Grid.toRows model.puzzle))
+                    ]
+
+                -- Hints Area
+                , div
+                    []
+                    [ text "Hints"
+                    , viewHintTool model.hintMessage
+                    ]
                 ]
-            , table
-                [ class "puzzle border-2 border-zinc-500" ]
-                (List.indexedMap viewRow (Grid.toRows model.puzzle))
             ]
     }
+
+
+viewHintTool : String -> Html Msg
+viewHintTool message =
+    let
+        btnClass =
+            "rounded py-2 px-4 bg-gray-800"
+    in
+    div []
+        [ Html.p
+            [ class "bg-black py-2 px-4 my-4 font-mono" ]
+            [ text message ]
+        , div
+            [ class "flex gap-2" ]
+            [ Html.button
+                [ class btnClass
+                , onClick (RequestedHint NakedSingle)
+                ]
+                [ text "Naked Single" ]
+            , Html.button
+                [ class btnClass
+                , onClick (RequestedHint NakedPair)
+                ]
+                [ text "Naked Pair" ]
+            , Html.button
+                [ class btnClass
+                , onClick (RequestedHint HiddenPair)
+                ]
+                [ text "Hidden Pair" ]
+            , Html.button
+                [ class btnClass
+                , onClick (RequestedHint NotImplemented)
+                ]
+                [ text "X Wing" ]
+            , Html.button
+                [ class btnClass
+                , onClick (RequestedHint NotImplemented)
+                ]
+                [ text "Y Wing" ]
+            , Html.button
+                [ class btnClass
+                , onClick (RequestedHint NotImplemented)
+                ]
+                [ text "Swordfish" ]
+            ]
+        ]
 
 
 viewCell :
