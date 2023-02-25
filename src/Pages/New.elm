@@ -18,7 +18,7 @@ import Shared
 import Sudoku.Grid as Grid exposing (Grid)
 import Sudoku.Number as Number exposing (Number)
 import Sudoku.Solve.Cell
-import Sudoku.Solve.Grid
+import Sudoku.Solve.Puzzle
 import UI
 import View exposing (View)
 
@@ -107,7 +107,7 @@ update req msg model =
             if isSolvable model.grid && isLegal model.grid then
                 ( model
                 , Cmd.batch
-                    [ Sudoku.Solve.Grid.save <|
+                    [ Sudoku.Solve.Puzzle.save <|
                         Grid.map cellToSolveCell model.grid
                     , Request.pushRoute Route.Solve req
                     ]

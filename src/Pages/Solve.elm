@@ -14,7 +14,7 @@ import Shared
 import Sudoku.Grid
 import Sudoku.Number as Number exposing (NumSet, Number)
 import Sudoku.Solve.Cell as Cell exposing (Cell(..))
-import Sudoku.Solve.Grid as Grid exposing (Coord, Grid)
+import Sudoku.Solve.Puzzle as Puzzle exposing (Coord, Puzzle)
 import UI
 import View exposing (View)
 
@@ -34,7 +34,7 @@ page shared req =
 
 
 type alias Model =
-    { puzzle : Grid
+    { puzzle : Puzzle
     , selectedCell : Maybe Coord
     , problemCell : Maybe Coord
     , insertMode : InsertMode
@@ -42,13 +42,13 @@ type alias Model =
     }
 
 
-init : Request.With Params -> Maybe Grid -> ( Model, Cmd Msg )
+init : Request.With Params -> Maybe Puzzle -> ( Model, Cmd Msg )
 init req savedPuzzle =
     let
         ( puzzle, cmd ) =
             case savedPuzzle of
                 Nothing ->
-                    ( Grid.empty, Request.pushRoute Route.Home_ req )
+                    ( Puzzle.empty, Request.pushRoute Route.Home_ req )
 
                 Just grid ->
                     ( grid, Cmd.none )
@@ -83,7 +83,7 @@ update msg model =
                     Cmd.none
 
                 Nothing ->
-                    Grid.save model.puzzle
+                    Puzzle.save model.puzzle
     in
     case msg of
         ClickedCell coord ->
@@ -238,15 +238,15 @@ insertNumber :
     Number
     -> Maybe Coord
     -> InsertMode
-    -> Grid
-    -> Result ( Grid, Coord ) Grid
+    -> Puzzle
+    -> Result ( Puzzle, Coord ) Puzzle
 insertNumber newNumber selectedCell mode grid =
     case selectedCell of
         Nothing ->
             Ok grid
 
         Just coord ->
-            case Grid.getByCoord coord grid of
+            case Puzzle.getByCoord coord grid of
                 Given _ ->
                     Ok grid
 
@@ -258,18 +258,18 @@ insertNumber newNumber selectedCell mode grid =
                         Number ->
                             let
                                 newGrid =
-                                    Grid.setByCoord coord grid <|
+                                    Puzzle.setByCoord coord grid <|
                                         Fixed newNumber notes
                             in
-                            if Grid.isLegal newGrid then
-                                Ok (Grid.pruneAll newGrid)
+                            if Puzzle.isLegal newGrid then
+                                Ok (Puzzle.pruneAll newGrid)
 
                             else
                                 Err ( newGrid, coord )
 
                         PrimaryNotes ->
                             Ok <|
-                                Grid.setByCoord coord grid <|
+                                Puzzle.setByCoord coord grid <|
                                     Possible possible
                                         { primary = toggleNote newNumber notes.primary
                                         , secondary = notes.secondary
@@ -277,7 +277,7 @@ insertNumber newNumber selectedCell mode grid =
 
                         SecondaryNotes ->
                             Ok <|
-                                Grid.setByCoord coord grid <|
+                                Puzzle.setByCoord coord grid <|
                                     Possible possible
                                         { primary = notes.primary
                                         , secondary = toggleNote newNumber notes.secondary
@@ -293,13 +293,13 @@ toggleNote number notes =
         Number.setInsert number notes
 
 
-clearNumber : Maybe Coord -> Grid -> Grid
+clearNumber : Maybe Coord -> Puzzle -> Puzzle
 clearNumber selectedCell grid =
     case selectedCell of
         Just coord ->
             let
                 cell =
-                    Grid.getByCoord coord grid
+                    Puzzle.getByCoord coord grid
             in
             case cell of
                 Given _ ->
@@ -310,9 +310,9 @@ clearNumber selectedCell grid =
 
                 Fixed _ notes ->
                     Possible Number.fullSet notes
-                        |> Grid.setByCoord coord grid
-                        |> Grid.resetPossible
-                        |> Grid.pruneAll
+                        |> Puzzle.setByCoord coord grid
+                        |> Puzzle.resetPossible
+                        |> Puzzle.pruneAll
 
         Nothing ->
             grid
@@ -386,7 +386,7 @@ type Hint
     | NotImplemented
 
 
-generateHint : Hint -> Grid -> String
+generateHint : Hint -> Puzzle -> String
 generateHint hint puzzle =
     case hint of
         NotImplemented ->
@@ -467,7 +467,7 @@ view model =
     , body =
         UI.layout
             [ div [ class "grid grid-cols-2" ]
-                [ -- Solve Grid
+                [ -- Solve Puzzle
                   div []
                     [ div
                         [ class "my-4" ]
@@ -500,7 +500,7 @@ view model =
                         ]
                     , table
                         [ class "puzzle border-2 border-zinc-500" ]
-                        (List.indexedMap viewRow (Grid.toRows model.puzzle))
+                        (List.indexedMap viewRow (Puzzle.toRows model.puzzle))
                     ]
 
                 -- Hints Area

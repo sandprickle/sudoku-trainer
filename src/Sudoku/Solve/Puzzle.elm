@@ -1,6 +1,6 @@
-port module Sudoku.Solve.Grid exposing
+port module Sudoku.Solve.Puzzle exposing
     ( Coord
-    , Grid
+    , Puzzle
     , coordDecoder
     , decoder
     , empty
@@ -30,7 +30,7 @@ import Sudoku.Number as Number exposing (NumSet)
 import Sudoku.Solve.Cell as Cell exposing (Cell(..))
 
 
-type alias Grid =
+type alias Puzzle =
     Grid.Grid Cell
 
 
@@ -38,7 +38,7 @@ type alias Grid =
 -- Validity Checks
 
 
-solvable : Grid -> Maybe Grid
+solvable : Puzzle -> Maybe Puzzle
 solvable grid =
     if isSolvable grid then
         Just grid
@@ -47,12 +47,12 @@ solvable grid =
         Nothing
 
 
-isSolvable : Grid -> Bool
+isSolvable : Puzzle -> Bool
 isSolvable grid =
     Grid.isSolvable Cell.getNumber grid
 
 
-legal : Grid -> Maybe Grid
+legal : Puzzle -> Maybe Puzzle
 legal grid =
     if isLegal grid then
         Just grid
@@ -61,7 +61,7 @@ legal grid =
         Nothing
 
 
-isLegal : Grid -> Bool
+isLegal : Puzzle -> Bool
 isLegal grid =
     Grid.isLegal Cell.getNumber grid
 
@@ -70,12 +70,12 @@ isLegal grid =
 -- Get/set by Coord
 
 
-getByCoord : Coord -> Grid -> Cell
+getByCoord : Coord -> Puzzle -> Cell
 getByCoord =
     Grid.getByCoord
 
 
-setByCoord : Coord -> Grid -> Cell -> Grid
+setByCoord : Coord -> Puzzle -> Cell -> Puzzle
 setByCoord =
     Grid.setByCoord
 
@@ -84,17 +84,17 @@ setByCoord =
 -- Convert to List of Rows, Cols, or Boxes
 
 
-toRows : Grid -> List (List Cell)
+toRows : Puzzle -> List (List Cell)
 toRows =
     Grid.toRows
 
 
-toCols : Grid -> List (List Cell)
+toCols : Puzzle -> List (List Cell)
 toCols =
     Grid.toCols
 
 
-toBoxes : Grid -> List (List Cell)
+toBoxes : Puzzle -> List (List Cell)
 toBoxes =
     Grid.toBoxes
 
@@ -122,7 +122,7 @@ boxCoords =
 -- Possible Value Pruning
 
 
-pruneAll : Grid -> Grid
+pruneAll : Puzzle -> Puzzle
 pruneAll grid =
     let
         newGrid =
@@ -138,7 +138,7 @@ pruneAll grid =
         pruneAll newGrid
 
 
-pruneRows : Grid -> Grid
+pruneRows : Puzzle -> Puzzle
 pruneRows grid =
     let
         rows =
@@ -147,7 +147,7 @@ pruneRows grid =
     List.foldl pruneReducer grid rows
 
 
-pruneCols : Grid -> Grid
+pruneCols : Puzzle -> Puzzle
 pruneCols grid =
     let
         cols =
@@ -156,7 +156,7 @@ pruneCols grid =
     List.foldl pruneReducer grid cols
 
 
-pruneBoxes : Grid -> Grid
+pruneBoxes : Puzzle -> Puzzle
 pruneBoxes grid =
     let
         boxes =
@@ -165,10 +165,10 @@ pruneBoxes grid =
     List.foldl pruneReducer grid boxes
 
 
-pruneReducer : List Coord -> Grid -> Grid
+pruneReducer : List Coord -> Puzzle -> Puzzle
 pruneReducer coords grid =
     let
-        fn : ( Coord, Cell ) -> Grid -> Grid
+        fn : ( Coord, Cell ) -> Puzzle -> Puzzle
         fn ( coord, cell ) grid_ =
             setByCoord coord grid_ cell
     in
@@ -202,7 +202,7 @@ pruneCells cells =
     List.map pruneCell cells
 
 
-empty : Grid
+empty : Puzzle
 empty =
     Grid.init Cell.default
 
@@ -211,7 +211,7 @@ empty =
 -- Puzzle Logic
 
 
-resetPossible : Grid -> Grid
+resetPossible : Puzzle -> Puzzle
 resetPossible grid =
     grid
         |> Grid.map
@@ -232,17 +232,17 @@ resetPossible grid =
 -- Encode/Decode
 
 
-encode : Grid -> Encode.Value
+encode : Puzzle -> Encode.Value
 encode =
     Grid.encode Cell.encode
 
 
-decoder : Decoder Grid
+decoder : Decoder Puzzle
 decoder =
     Grid.decoder Cell.decoder
 
 
-fromJson : Encode.Value -> Maybe Grid
+fromJson : Encode.Value -> Maybe Puzzle
 fromJson json =
     case Decode.decodeValue decoder json of
         Ok grid ->
@@ -265,7 +265,7 @@ port loadGrid : () -> Cmd msg
 port gridReceiver : (Decode.Value -> msg) -> Sub msg
 
 
-save : Grid -> Cmd msg
+save : Puzzle -> Cmd msg
 save grid =
     saveGrid (encode grid)
 
@@ -275,7 +275,7 @@ load _ =
     loadGrid ()
 
 
-receiver : (Maybe Grid -> msg) -> Sub msg
+receiver : (Maybe Puzzle -> msg) -> Sub msg
 receiver fromGrid =
     gridReceiver (\json -> fromJson json |> fromGrid)
 

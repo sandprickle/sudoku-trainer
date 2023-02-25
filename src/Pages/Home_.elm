@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, href)
 import Page
 import Request
 import Shared
-import Sudoku.Solve.Grid exposing (Grid)
+import Sudoku.Solve.Puzzle exposing (Puzzle)
 import UI
 import View exposing (View)
 
@@ -27,10 +27,10 @@ page shared _ =
 
 
 type alias Model =
-    { currentPuzzle : Maybe Grid }
+    { currentPuzzle : Maybe Puzzle }
 
 
-init : Maybe Grid -> ( Model, Cmd Msg )
+init : Maybe Puzzle -> ( Model, Cmd Msg )
 init puzzle =
     ( { currentPuzzle = puzzle }
     , Cmd.none
