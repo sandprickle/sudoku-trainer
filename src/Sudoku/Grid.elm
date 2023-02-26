@@ -4,6 +4,7 @@ module Sudoku.Grid exposing
     , boxCoords
     , colCoords
     , coordDecoder
+    , coordMap
     , coordToIndex
     , decoder
     , encode
@@ -67,6 +68,19 @@ map fn (Grid { default, array }) =
     Grid
         { default = fn default
         , array = Array.map fn array
+        }
+
+
+coordMap : (Coord -> a -> b) -> Grid a -> Grid b
+coordMap fn (Grid { default, array }) =
+    Grid
+        { default = fn { x = 0, y = 0 } default
+        , array =
+            Array.indexedMap
+                (\index elem ->
+                    fn (indexToCoord index) elem
+                )
+                array
         }
 
 
