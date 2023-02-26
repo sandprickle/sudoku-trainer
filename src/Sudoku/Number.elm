@@ -20,6 +20,7 @@ module Sudoku.Number exposing
     , setInsert
     , setMember
     , setRemove
+    , setSize
     , setToList
     , seven
     , six
@@ -170,6 +171,8 @@ fullSet =
     List.range 1 9 |> Set.fromList |> NumSet
 
 
+{-| A set of no Numbers
+-}
 emptySet : NumSet
 emptySet =
     [] |> Set.fromList |> NumSet
@@ -183,6 +186,11 @@ setInsert (Number num) (NumSet set) =
 setRemove : Number -> NumSet -> NumSet
 setRemove (Number num) (NumSet set) =
     NumSet (Set.remove num set)
+
+
+setSize : NumSet -> Int
+setSize (NumSet set) =
+    Set.size set
 
 
 {-| Get the difference between the first set and the second.
