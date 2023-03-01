@@ -15,10 +15,10 @@ import Keyboard exposing (Key, RawKey)
 import Page
 import Request
 import Shared
+import Solve.Cell
+import Solve.Puzzle
 import Sudoku.Grid as Grid exposing (Grid)
 import Sudoku.Number as Number exposing (Number)
-import Sudoku.Solve.Cell
-import Sudoku.Solve.Puzzle
 import UI
 import View exposing (View)
 
@@ -107,7 +107,7 @@ update req msg model =
             if isSolvable model.grid && isLegal model.grid then
                 ( model
                 , Cmd.batch
-                    [ Sudoku.Solve.Puzzle.save <|
+                    [ Solve.Puzzle.save <|
                         Grid.map cellToSolveCell model.grid
                     , Request.pushRoute Route.Solve req
                     ]
@@ -319,14 +319,14 @@ getNumber cell =
             Nothing
 
 
-cellToSolveCell : Cell -> Sudoku.Solve.Cell.Cell
+cellToSolveCell : Cell -> Solve.Cell.Cell
 cellToSolveCell cell =
     case cell of
         Number number ->
-            Sudoku.Solve.Cell.Given number
+            Solve.Cell.Given number
 
         Blank ->
-            Sudoku.Solve.Cell.default
+            Solve.Cell.default
 
 
 isLegal : Grid Cell -> Bool

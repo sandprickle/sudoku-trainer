@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, href)
 import Page
 import Request
 import Shared
-import Sudoku.Solve.Puzzle exposing (Puzzle)
+import Solve.Puzzle exposing (Puzzle)
 import UI
 import View exposing (View)
 
