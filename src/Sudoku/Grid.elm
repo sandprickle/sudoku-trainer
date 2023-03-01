@@ -3,6 +3,7 @@ module Sudoku.Grid exposing
     , Grid
     , boxCoords
     , colCoords
+    , compareCoord
     , coordDecoder
     , coordMap
     , coordToIndex
@@ -342,6 +343,27 @@ indexToCoord index =
     { x = modBy 9 normalizedIndex
     , y = normalizedIndex // 9
     }
+
+
+compareCoord : Coord -> Coord -> Order
+compareCoord coord1 coord2 =
+    case compare coord1.x coord2.x of
+        LT ->
+            LT
+
+        GT ->
+            GT
+
+        EQ ->
+            case compare coord1.y coord2.y of
+                LT ->
+                    LT
+
+                GT ->
+                    GT
+
+                EQ ->
+                    EQ
 
 
 encodeCoord : Coord -> Json.Value
