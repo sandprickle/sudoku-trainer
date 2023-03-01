@@ -19,6 +19,7 @@
             "elm-explorations/benchmark": "1.0.2",
             "elm-explorations/test": "2.1.0",
             "ohanhi/keyboard": "2.0.1",
+            "owanturist/elm-avl-dict": "2.1.0",
             "ryannhg/elm-spa": "6.0.0"
         },
         "indirect": {
