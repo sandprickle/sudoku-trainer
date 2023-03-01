@@ -1,4 +1,4 @@
-module Sudoku.Solve.Cell exposing
+module Solve.Cell exposing
     ( Cell(..)
     , Notes
     , decoder

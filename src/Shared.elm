@@ -9,7 +9,7 @@ module Shared exposing
 
 import Json.Decode as Json
 import Request exposing (Request)
-import Sudoku.Solve.Puzzle as Puzzle exposing (Puzzle)
+import Solve.Puzzle as Puzzle exposing (Puzzle)
 
 
 type alias Flags =

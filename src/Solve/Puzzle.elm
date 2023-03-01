@@ -1,4 +1,4 @@
-port module Sudoku.Solve.Puzzle exposing
+port module Solve.Puzzle exposing
     ( Coord
     , Puzzle
     , coordDecoder
@@ -25,9 +25,9 @@ port module Sudoku.Solve.Puzzle exposing
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Solve.Cell as Cell exposing (Cell(..))
 import Sudoku.Grid as Grid
 import Sudoku.Number as Number exposing (NumSet)
-import Sudoku.Solve.Cell as Cell exposing (Cell(..))
 
 
 type alias Puzzle =

@@ -11,10 +11,10 @@ import Page
 import Request
 import Set
 import Shared
+import Solve.Cell as Cell exposing (Cell(..))
+import Solve.Puzzle as Puzzle exposing (Coord, Puzzle)
 import Sudoku.Grid
 import Sudoku.Number as Number exposing (NumSet, Number)
-import Sudoku.Solve.Cell as Cell exposing (Cell(..))
-import Sudoku.Solve.Puzzle as Puzzle exposing (Coord, Puzzle)
 import UI
 import View exposing (View)
 
