@@ -2,6 +2,7 @@ module Sudoku.Number exposing
     ( NumSet
     , Number
     , all
+    , compareNumber
     , decoder
     , eight
     , emptySet
@@ -288,6 +289,15 @@ nine =
 all : List Number
 all =
     [ one, two, three, four, five, six, seven, eight, nine ]
+
+
+
+-- Comparison
+
+
+compareNumber : Number -> Number -> Order
+compareNumber (Number a) (Number b) =
+    compare a b
 
 
 
