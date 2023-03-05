@@ -93,8 +93,13 @@ update msg model =
             ( changeMode model, Cmd.none )
 
         RequestedHint hint ->
+            let
+                prunedPuzzle =
+                    Puzzle.pruneAll model.puzzle
+            in
             ( { model
-                | hintMessage = Hint.generateHint hint model.puzzle
+                | hintMessage = Hint.generateHint hint prunedPuzzle
+                , puzzle = prunedPuzzle
               }
             , Cmd.none
             )
