@@ -27,4 +27,12 @@ suite =
                         |> Number.toString
                         |> Expect.equal "3"
             ]
+        , describe "Sudoku.Number.NumSet"
+            [ test "setFromList -> setToList orders elements" <|
+                \_ ->
+                    [ Number.two, Number.one ]
+                        |> Number.setFromList
+                        |> Number.setToList
+                        |> Expect.equal [ Number.one, Number.two ]
+            ]
         ]
