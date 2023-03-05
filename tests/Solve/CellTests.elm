@@ -1,14 +1,14 @@
-module Sudoku.CellTests exposing (..)
+module Solve.CellTests exposing (..)
 
 import Expect
+import Solve.Cell as Cell
 import Sudoku.Number as Number
-import Sudoku.Solve.Cell as Cell
 import Test exposing (..)
 
 
 suite : Test
 suite =
-    describe "Sudoku.Cell Module"
+    describe "Solve.Cell Module"
         [ describe "Sudoku.Cell.initFromChar"
             [ test "Valid number input results in a given cell value" <|
                 \_ ->
