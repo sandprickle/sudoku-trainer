@@ -21,8 +21,6 @@ import Sudoku.Number as Number exposing (NumSet, Number)
 type Hint
     = NakedSingle
     | NakedPair
-    | HiddenPair
-    | NotImplemented
 
 
 
@@ -58,9 +56,6 @@ generateHint hint puzzle =
             Grid.coordMap convertCell puzzle
     in
     case hint of
-        NotImplemented ->
-            "Hint not Implemented yet"
-
         NakedSingle ->
             let
                 qty =
@@ -88,9 +83,6 @@ generateHint hint puzzle =
 
             else
                 "No naked pairs"
-
-        _ ->
-            "No hints for you!"
 
 
 

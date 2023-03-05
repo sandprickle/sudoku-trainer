@@ -487,26 +487,6 @@ viewHintTool message =
                 , onClick (RequestedHint NakedPair)
                 ]
                 [ text "Naked Pair" ]
-            , Html.button
-                [ class btnClass
-                , onClick (RequestedHint HiddenPair)
-                ]
-                [ text "Hidden Pair" ]
-            , Html.button
-                [ class btnClass
-                , onClick (RequestedHint NotImplemented)
-                ]
-                [ text "X Wing" ]
-            , Html.button
-                [ class btnClass
-                , onClick (RequestedHint NotImplemented)
-                ]
-                [ text "Y Wing" ]
-            , Html.button
-                [ class btnClass
-                , onClick (RequestedHint NotImplemented)
-                ]
-                [ text "Swordfish" ]
             ]
         ]
 
