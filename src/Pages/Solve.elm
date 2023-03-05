@@ -12,8 +12,8 @@ import Request
 import Set
 import Shared
 import Solve.Cell as Cell exposing (Cell(..))
+import Solve.Hint as Hint exposing (Hint(..))
 import Solve.Puzzle as Puzzle exposing (Coord, Puzzle)
-import Sudoku.Grid
 import Sudoku.Number as Number exposing (NumSet, Number)
 import UI
 import View exposing (View)
@@ -94,7 +94,7 @@ update msg model =
 
         RequestedHint hint ->
             ( { model
-                | hintMessage = generateHint hint model.puzzle
+                | hintMessage = Hint.generateHint hint model.puzzle
               }
             , Cmd.none
             )
@@ -373,55 +373,6 @@ updateSelection action selectedCell =
 
                 MoveRight ->
                     Just (moveSelectionRight coord)
-
-
-
--- Hint Type
-
-
-type Hint
-    = NakedSingle
-    | NakedPair
-    | HiddenPair
-    | NotImplemented
-
-
-generateHint : Hint -> Puzzle -> String
-generateHint hint puzzle =
-    case hint of
-        NotImplemented ->
-            "Hint not Implemented yet"
-
-        NakedSingle ->
-            let
-                qty =
-                    puzzle
-                        |> Sudoku.Grid.map
-                            (\cell ->
-                                case cell of
-                                    Cell.Fixed _ _ ->
-                                        0
-
-                                    Cell.Given _ ->
-                                        0
-
-                                    Cell.Possible numbers _ ->
-                                        numbers
-                                            |> Number.setToList
-                                            |> List.length
-                            )
-                        |> Sudoku.Grid.toList
-                        |> List.filter (\x -> x == 1)
-                        |> List.length
-            in
-            if qty >= 1 then
-                "Found " ++ String.fromInt qty ++ " naked single"
-
-            else
-                "No naked singles"
-
-        _ ->
-            "No hints for you!"
 
 
 
