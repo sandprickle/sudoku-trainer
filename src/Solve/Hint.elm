@@ -1,7 +1,6 @@
 module Solve.Hint exposing
     ( Hint(..)
     , Pair
-    , PairCandidate
     , checkNakedPairCandidates
     , comparePair
     , generateHint
@@ -73,8 +72,29 @@ generateHint hint puzzle =
             else
                 "No naked singles"
 
+        NakedPair ->
+            let
+                nakedPairs =
+                    findNakedPairs grid
+
+                qty =
+                    Set.size nakedPairs
+            in
+            if qty >= 2 then
+                "Found " ++ String.fromInt qty ++ " naked pairs"
+
+            else if qty == 1 then
+                "Found " ++ String.fromInt qty ++ " naked pair"
+
+            else
+                "No naked pairs"
+
         _ ->
             "No hints for you!"
+
+
+
+-- Singles
 
 
 countNakedSingles : Grid Cell -> Int
@@ -102,6 +122,7 @@ type alias Pair =
     ( Coord, Coord )
 
 
+emptyPairSet : Set Pair
 emptyPairSet =
     Set.emptyWith comparePair
 
